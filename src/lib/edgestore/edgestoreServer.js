@@ -4,7 +4,6 @@ import { initEdgeStoreClient } from "@edgestore/server/core";
 import { dbConnect } from "@/server/services/mongoose";
 import { cookies } from "next/headers";
 import { checkAuthByJWT } from "@/lib/serverAuthUtils";
-import { entityTypes } from "@/lib/globals";
 import { z } from "zod";
 import {
   embedAndStoreText,

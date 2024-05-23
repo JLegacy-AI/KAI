@@ -37,7 +37,6 @@ export default function ChatBox({
   isAskAiMutationLoading,
 }) {
   const [userInput, setUserInput] = useState("");
-  const [contextType, setContextType] = useState("global");
   const searchParams = useSearchParams();
 
   return (
@@ -82,25 +81,14 @@ export default function ChatBox({
           onChange={(e) => setUserInput(e.target.value)}
         />
         <Flex className="items-center justify-between mt-2">
-          <SegmentedControl.Root
-            defaultValue={contextType}
-            className="w-fit"
-            size="1"
-            onValueChange={(val) => {
-              setContextType(val);
-            }}
-          >
-            <SegmentedControl.Item value="global">{l("Global")}</SegmentedControl.Item>
-            <SegmentedControl.Item value="local">{l("Local")}</SegmentedControl.Item>
-          </SegmentedControl.Root>
           <Button
             size="1"
             className="cursor-pointer"
             // onClick={handleSendMessage}
             onClick={() => {
               askAiMutation.mutate({
-                queryType: "question",
-                question: { content: userInput, contextType: contextType },
+                // TODO check if chatSessionId is not provided, also get a bot id
+                question: { content: userInput },
                 displayMessage: userInput,
                 chatSessionId: searchParams.get("chat_session_id") || "new",
               });

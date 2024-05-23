@@ -16,6 +16,7 @@ import chatSessionModel from "@/server/models/chatSession.model";
 import { esBackendClient } from "@/lib/edgestore/edgestoreServer";
 import { askAiSchema } from "@/lib/zodSchemas";
 import { getContentFromFileUrl } from "@/lib/utils";
+import botModel from "../models/bot.model";
 
 export const userProcedure = publicProcedure.use(async (opts) => {
   const { ctx, next } = opts;
@@ -216,5 +217,88 @@ export const userRouter = router({
       await user.save();
 
       return { message: l("Tokens bought successfully") };
+    }),
+  createBot: userProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        accessType: z.enum(["public", "private"]).default("private"),
+      })
+    )
+    .mutation(async (opts) => {
+      const user = opts.ctx.user;
+      const { name, description, accessType } = opts.input;
+
+      const newBot = await botModel.create({
+        name,
+        description,
+        accessType,
+        creator: user._id,
+      });
+
+      user.bots.push(newBot._id);
+      await user.save();
+
+      return newBot;
+    }),
+  getBots: userProcedure.query(async (opts) => {
+    const user = opts.ctx.user;
+    // Get array of bots in user model, and popullate them, that way we also get the bots he added from other users
+
+    // Also sort the bots by createdAt date in descending order
+    // let userData = await userModel.findOne({ _id: user._id }).populate("bots");
+    let userData = await userModel.findOne({ _id: user._id }).populate({
+      path: "bots",
+      options: { sort: { createdAt: -1 } },
+    });
+
+    // Filter out the bots that the user has not created and are private
+    const bots = userData.bots.filter(
+      (bot) =>
+        String(bot.creator) == String(user._id) || bot.accessType == "public"
+    );
+
+    return bots;
+  }),
+  getCommunityBots: userProcedure.query(async (opts) => {
+    const user = opts.ctx.user;
+    // Get all the bots that are public and not created by the user
+    const bots = await botModel
+      .find({
+        creator: { $ne: user._id },
+        accessType: "public",
+      })
+      .sort({ createdAt: -1 });
+
+    return bots.filter((bot) => !user.bots.includes(bot._id));
+  }),
+  addBot: userProcedure
+    .input(z.object({ botId: z.string() }))
+    .mutation(async (opts) => {
+      const user = opts.ctx.user;
+      const { botId } = opts.input;
+
+      // Check if the bot exists
+      const bot = await botModel.findById(botId);
+      if (!bot) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: l("Bot not found"),
+        });
+      }
+
+      // Check if the user already has the bot
+      if (user.bots.includes(botId)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: l("Bot already added"),
+        });
+      }
+
+      user.bots.push(botId);
+      await user.save();
+
+      return { bot: bot , message: l("Bot added successfully") };
     }),
 });

@@ -24,7 +24,6 @@ import { l } from "@/lib/language";
 import { useSearchParams } from "next/navigation";
 import { trpc } from "@/app/_trpc/client";
 import { createDisplayMessage  } from "../utils";
-import EntityDetailDialog from "./EntityDetailModal";
 import { layoutDir } from "@/lib/globals";
 
 export default function ViewUserFilesTab({
@@ -138,11 +137,11 @@ export default function ViewUserFilesTab({
 
   return (
     <Box className={twMerge("w-full h-full", className)}>
-      <EntityDetailDialog
+      {/* <EntityDetailDialog
         isOpen={!!fileToRewrite}
         setIsOpen={(val) => setFileToRewrite(null)}
         onSubmit={(entity) => handleRewriteFile(fileToRewrite, entity)}
-      />
+      /> */}
       {fileCategories && (
         <Flex className="flex-col p-2 border-b border-gray-300">
           <Flex className="justify-between items-center gap-2">

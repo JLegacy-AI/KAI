@@ -10,6 +10,7 @@ import {
   Spinner,
 } from "@radix-ui/themes";
 import {
+  BrainIcon,
   FolderOpenIcon,
   MessageSquareTextIcon,
   SettingsIcon,
@@ -25,6 +26,7 @@ import toast from "react-hot-toast";
 import SettingsModal from "./_components/SettingsModal";
 import { l } from "@/lib/language";
 import { layoutDir } from "@/lib/globals";
+import Link from "next/link";
 
 export default function UserDashboardPage() {
   const router = useRouter();
@@ -233,29 +235,40 @@ export default function UserDashboardPage() {
                 <IconButton
                   variant="surface"
                   className="cursor-pointer"
+                  onClick={() => setIsFilesSidebarOpen((prev) => !prev)}
+                  asChild
+                >
+                  <Link href="/me/bots">
+                    <BrainIcon size="16px" />
+                  </Link>
+                </IconButton>
+                <IconButton
+                  variant="surface"
+                  className="cursor-pointer"
                   onClick={() => setIsChatSidebarOpen((prev) => !prev)}
                 >
                   <MessageSquareTextIcon size="16px" />
                 </IconButton>
-                <IconButton
+
+                {/* <IconButton
                   variant="surface"
                   className="cursor-pointer"
                   onClick={() => setIsFilesSidebarOpen((prev) => !prev)}
                 >
                   <FolderOpenIcon size="16px" />
-                </IconButton>
+                </IconButton> */}
               </Box>
             </TopBarWrapper>
           }
         />
-        <FilesSidebar
+        {/* <FilesSidebar
           isOpen={isFilesSidebarOpen}
           setIsOpen={setIsFilesSidebarOpen}
           userId={getUser?.data?.id}
           updateSearchParam={handleSearchParamChange}
           askAiMutation={askAi}
           user={getUser.data}
-        />
+        /> */}
       </Flex>
     </Box>
   );

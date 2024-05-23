@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     totalTokensUsed: { type: Number, default: 0 }, // Total tokens used by the user in its lifetime
     tokensGranted: { type: Number, default: 0 }, // Tokens granted to the user
     tokensUsed: { type: Number, default: 0 }, // Tokens used out of the granted tokens
+    bots: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bot" }],
   },
   {
     timestamps: true,

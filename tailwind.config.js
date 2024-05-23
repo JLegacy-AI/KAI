@@ -16,6 +16,9 @@ module.exports = {
       },
       colors: {
         gray: colors.slate,
+      },
+      container: {
+        center: true,
       }
     },
   },
