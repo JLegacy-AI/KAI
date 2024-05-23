@@ -2,7 +2,7 @@
 
 import { countTokens, generateUniqueId } from "@/lib/utils";
 import { createTextFile } from "@/utils/fileUtils";
-import { ScrollArea, Select } from "@radix-ui/themes";
+import { Progress, ScrollArea, Select } from "@radix-ui/themes";
 import {
   CheckCircleIcon,
   FileIcon,
@@ -40,14 +40,7 @@ const ERROR_MESSAGES = {
 
 const MultiFileDropzone = React.forwardRef(
   (
-    {
-      dropzoneOptions,
-      value,
-      className,
-      disabled,
-      onFilesAdded,
-      onChange,
-    },
+    { dropzoneOptions, value, className, disabled, onFilesAdded, onChange },
     ref
   ) => {
     const [customError, setCustomError] = React.useState();
@@ -161,77 +154,74 @@ const MultiFileDropzone = React.forwardRef(
 
           {/* Selected Files */}
           <div className="flex flex-col gap-2">
-            {value?.map(
-              (
-                {
-                  file,
-                  progress,
-                  key: fileKey,
-                  tokens,
-                },
-                i
-              ) => (
-                <div
-                  key={i}
-                  className="flex h-16 w-96 w-full max-w-[100vw] flex-col justify-center rounded border border-gray-300 px-4 py-2 bg-white"
-                >
-                  <div className="flex items-center gap-2 text-gray-500 dark:text-white">
-                    <FileIcon size="30" className="shrink-0 text-gray-600" />
-                    <div className="min-w-0 text-sm text-gray-600">
-                      <div
-                        className={twMerge(
-                          "text-xs overflow-hidden overflow-ellipsis whitespace-nowrap w-full"
-                        )}
-                      >
-                        {file.name}
-                      </div>
-                      <div className="text-xs text-gray-400 dark:text-gray-400">
-                        {formatFileSize(file.size)}{" "}
-                      </div>
-                      <div className="text-xs text-gray-400 dark:text-gray-400">
-                        {tokens} Tokens
-                      </div>
-                    </div>
-                    <div className="grow" />
-                    <div className="flex w-12 w-fit justify-end text-xs">
-                      {progress === "PENDING" ? (
-                        <div className="flex items-center gap-3">
-                          <button
-                            className="rounded-md p-1 transition-colors duration-200 text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                            onClick={() => {
-                              void onChange?.(
-                                value.filter((_, index) => index !== i)
-                              );
-                            }}
-                          >
-                            <Trash2Icon className="shrink-0" />
-                          </button>
-                        </div>
-                      ) : progress === "ERROR" ? (
-                        <LucideFileWarning className="shrink-0 text-red-600 dark:text-red-400" />
-                      ) : progress !== "COMPLETE" ? (
-                        <div>{Math.round(progress)}%</div>
-                      ) : (
-                        <CheckCircleIcon className="shrink-0 text-green-600" />
+            {value?.map(({ file, progress, key: fileKey, tokens }, i) => (
+              <div
+                key={i}
+                className="flex h-16 w-96 w-full max-w-[100vw] flex-col justify-center rounded border border-gray-300 px-4 py-2 bg-white"
+              >
+                <div className="flex items-center gap-2 text-gray-500 dark:text-white">
+                  <FileIcon size="30" className="shrink-0 text-gray-600" />
+                  <div className="min-w-0 text-sm text-gray-600">
+                    <div
+                      className={twMerge(
+                        "text-xs overflow-hidden overflow-ellipsis whitespace-nowrap w-full"
                       )}
+                    >
+                      {file.name}
+                    </div>
+                    <div className="text-xs text-gray-400 dark:text-gray-400">
+                      {formatFileSize(file.size)}{" "}
+                    </div>
+                    <div className="text-xs text-gray-400 dark:text-gray-400">
+                      {tokens} Tokens
                     </div>
                   </div>
-                  {/* Progress Bar */}
-                  {typeof progress === "number" && (
+                  <div className="grow" />
+                  <div className="flex w-12 w-fit justify-end text-xs">
+                    {progress === "PENDING" ? (
+                      <div className="flex items-center gap-3">
+                        <button
+                          className="rounded-md p-1 transition-colors duration-200 text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={() => {
+                            void onChange?.(
+                              value.filter((_, index) => index !== i)
+                            );
+                          }}
+                        >
+                          <Trash2Icon className="shrink-0" />
+                        </button>
+                      </div>
+                    ) : progress === "ERROR" ? (
+                      <LucideFileWarning className="shrink-0 text-red-600 dark:text-red-400" />
+                    ) : progress !== "COMPLETE" ? (
+                      <>
+                        <div className="text-black">
+                          {Math.round(progress)}%
+                        </div>
+                      </>
+                    ) : (
+                      <CheckCircleIcon className="shrink-0 text-green-600" />
+                    )}
+                  </div>
+                </div>
+                {/* Progress Bar */}
+                {typeof progress === "number" && (
+                  <>
                     <div className="relative h-0 mb-1">
-                      <div className="absolute top-1 h-1 w-full overflow-clip rounded-full bg-gray-200 dark:bg-gray-700">
+                      <Progress value={progress} />
+                      {/* <div className="absolute top-1 h-1 w-full overflow-clip rounded-full bg-gray-200 dark:bg-gray-700">
                         <div
                           className="h-full bg-gray-400 transition-all duration-300 ease-in-out dark:bg-white"
                           style={{
                             width: progress ? `${progress}%` : "0%",
                           }}
                         />
-                      </div>
+                      </div> */}
                     </div>
-                  )}
-                </div>
-              )
-            )}
+                  </>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>

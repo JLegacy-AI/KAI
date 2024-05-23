@@ -299,6 +299,40 @@ export const userRouter = router({
       user.bots.push(botId);
       await user.save();
 
-      return { bot: bot , message: l("Bot added successfully") };
+      return { bot: bot, message: l("Bot added successfully") };
+    }),
+  getBotFiles: userProcedure
+    .input(z.object({ botId: z.string() }))
+    .query(async (opts) => {
+      const user = opts.ctx.user;
+      const { botId } = opts.input;
+
+      // Check if the user has created the bot
+      const bot = await botModel.findById(botId);
+      if (!bot) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: l("Bot not found"),
+        });
+      }
+
+      if (String(bot.creator) !== String(user._id)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: l("You are not authorized to access this bot"),
+        });
+      }
+
+      let options = {
+        filter: {
+          path: {
+            botId: botId,
+          },
+        },
+      };
+
+      // As the metadata filter is not working, we will filter the files manually
+      let allFiles = await esBackendClient.userKbFiles.listFiles(options);
+      return allFiles;
     }),
 });

@@ -11,6 +11,7 @@ import {
 } from "@/lib/langchain";
 import { countTokens } from "@/lib/utils";
 import userModel from "@/server/models/user.model";
+import botModel from "@/server/models/bot.model";
 
 async function createContext({ req }) {
   try {
@@ -47,7 +48,7 @@ const edgeStoreRouter = es.router({
         botId: z.string(),
       })
     )
-    .path(({ ctx, input }) => [{ userId: ctx.userId, botId: input.botId }])
+    .path(({ ctx, input }) => [{ botId: input.botId }])
     .metadata(({ ctx, input }) => ({
       id: input.id,
       category: input.category,
@@ -106,6 +107,11 @@ const edgeStoreRouter = es.router({
 
       user.tokensUsed = user.tokensUsed + fileTextTokens;
       await user.save();
+      
+      // update training token count in bot
+      await botModel.findByIdAndUpdate(input.botId, {
+        $inc: { trainingTokensCount: fileTextTokens }
+      });
 
       return true;
     })

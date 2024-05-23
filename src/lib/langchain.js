@@ -21,7 +21,7 @@ import { TRPCError } from "@trpc/server";
 
 const embeddings = new VoyageEmbeddings({
   apiKey: VOYAGE_API_KEY,
-  modelName: "voyage-large-2",
+  modelName: "voyage-2",
 });
 const pinecone = new Pinecone({
   apiKey: PINECONE_API_KEY,

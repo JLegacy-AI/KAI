@@ -57,22 +57,27 @@ export default function UploadFilesTab({
           let shouldAbort = false;
           // Check if the user has enough tokens to upload the files, if no then abort the upload and set the progress to error
           addedFiles = addedFiles.map((addedFile) => {
-            if(addedFile.tokens > tokensAvailable) {
-              addedFile.progress = "ERROR";
-              shouldAbort = true;
-              toast.error(
-                `Insufficient tokens to upload file: ${addedFile.file.name}`
-              );
-            }
+            if (addedFile.tokens <= tokensAvailable) {
+              addedFile.progress = 0;
+              return addedFile;
+            };
+
+            addedFile.progress = "ERROR";
+            shouldAbort = true;
+            toast.error(
+              `Insufficient tokens to upload file: ${addedFile.file.name}`
+            );
           });
 
           setFileStates([...fileStates, ...addedFiles]);
 
-          if(shouldAbort) return;
+          if (shouldAbort) return;
 
           await Promise.all(
             addedFiles.map(async (addedFileState) => {
               try {
+                console.log("Uploading File: ", addedFileState.file.name);
+                updateFileProgress(addedFileState.key, 1);
                 const res = await edgestore[fileBucketName].upload({
                   file: addedFileState.file,
                   input: {
@@ -91,12 +96,13 @@ export default function UploadFilesTab({
                     }
                   },
                 });
-                console.log(res);
+                console.log("Response: ", res);
               } catch (err) {
+                toast.error(`Error uploading file: ${addedFileState.file.name}`);
                 updateFileProgress(addedFileState.key, "ERROR");
               }
             })
-          )
+          );
         }}
         dropzoneOptions={{
           accept: {

@@ -13,7 +13,7 @@ import {
   Box,
 } from "@radix-ui/themes";
 import { l } from "@/lib/language";
-import { entityTypes, layoutDir } from "@/lib/globals";
+import {  layoutDir } from "@/lib/globals";
 import { useState } from "react";
 import { getUsedTokensPercentage } from "../utils";
 import toast from "react-hot-toast";
