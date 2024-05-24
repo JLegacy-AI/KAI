@@ -12,8 +12,8 @@ const links = [
     href: "/me",
   },
   {
-    title: "Add Bot",
-    href: "/me/bots/add",
+    title: "Create Bot",
+    href: "/me/bots/create",
   },
   {
     title: "View Bots",

@@ -231,23 +231,89 @@ export const userRouter = router({
         name: z.string(),
         description: z.string(),
         accessType: z.enum(["public", "private"]).default("private"),
+        prompt: z.string().optional(),
       })
     )
     .mutation(async (opts) => {
       const user = opts.ctx.user;
-      const { name, description, accessType } = opts.input;
+      const { name, description, accessType, prompt } = opts.input;
 
       const newBot = await botModel.create({
         name,
         description,
         accessType,
         creator: user._id,
+        prompt,
       });
 
       user.bots.push(newBot._id);
       await user.save();
 
       return newBot;
+    }),
+  updateBot: userProcedure
+    .input(
+      z.object({
+        botId: z.string(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        accessType: z.enum(["public", "private"]).optional(),
+        prompt: z.string().optional(),
+      })
+    )
+    .mutation(async (opts) => {
+      const user = opts.ctx.user;
+      const { botId } = opts.input;
+
+      const bot = await botModel.findById(botId);
+
+      if (!bot) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: l("Bot not found"),
+        });
+      }
+
+      if (String(bot.creator) !== String(user._id)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: l("You are not authorized to update this bot"),
+        });
+      }
+
+      const { name, description, accessType, prompt } = opts.input;
+      if (name) bot.name = name;
+      if (description) bot.description = description;
+      if (accessType) bot.accessType = accessType;
+      if (prompt) bot.prompt = prompt;
+
+      await bot.save();
+      return { bot };
+    }),
+  deleteBot: userProcedure
+    .input(z.object({ botId: z.string() }))
+    .mutation(async (opts) => {
+      const user = opts.ctx.user;
+      const { botId } = opts.input;
+
+      const bot = await botModel.findById(botId);
+
+      if (!bot) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: l("Bot not found"),
+        });
+      }
+
+      if (String(bot.creator) !== String(user._id)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: l("You are not authorized to delete this bot"),
+        });
+      }
+
+      await botModel.findByIdAndDelete(botId);
+      return { message: "Bot deleted successfully" };
     }),
   getBot: userProcedure
     .input(
@@ -268,12 +334,16 @@ export const userRouter = router({
         });
       }
 
+      /*
       if (bot.accessType === "private" && !user.bots.includes(botId)) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: l("You are not authorized to access this bot"),
         });
       }
+      */
+
+      return bot;
     }),
   getBots: userProcedure.query(async (opts) => {
     const user = opts.ctx.user;

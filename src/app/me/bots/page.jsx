@@ -1,11 +1,23 @@
 "use client";
 
-import { Box, Button, Grid, Heading, Tabs, Text, Card, Spinner } from "@radix-ui/themes";
+import {
+  Box,
+  Button,
+  Grid,
+  Heading,
+  Tabs,
+  Text,
+  Card,
+  Spinner,
+  IconButton,
+} from "@radix-ui/themes";
 import Link from "next/link";
 import Navbar from "./_components/Navbar";
 import { trpc } from "@/app/_trpc/client";
 import FilesSidebar from "../_components/FilesSidebar";
 import { useEffect } from "react";
+import { FileIcon, PencilIcon, TrashIcon } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function ViewBotsPage() {
   const user = trpc.user.get.useQuery(undefined, {});
@@ -16,6 +28,18 @@ export default function ViewBotsPage() {
     },
     onError: (error) => {
       console.log("[error@getBots]: ", error.message);
+    },
+  });
+
+  const deleteBotMutation = trpc.user.deleteBot.useMutation({
+    onSuccess: (data) => {
+      console.log("[deleteBot] Data: ", data);
+      toast.success("Bot deleted successfully");
+      getBots.refetch();
+    },
+    onError: (err) => {
+      toast.error("Failed to delete bot");
+      console.log("[error@deleteBot]: ", err.message);
     },
   });
 
@@ -41,11 +65,42 @@ export default function ViewBotsPage() {
               </Box>
               <Box className="mt-2 flex justify-between items-center">
                 <Text as="p" size="2" color="gray">
-                  Word Count: 20
+                  {/* Convert token count to word count */}
+                  Word Count: {bot.trainingTokenCount / 1.3}
                 </Text>
                 {user?.data?.id == bot.creator && (
-                  <Button size="1" asChild>
-                    <Link href={`/me/bots/${bot.id}/files`}>View Files</Link></Button>
+                  <Box className="flex gap-2">
+                    <IconButton
+                      size="1"
+                      className="cursor-pointer"
+                      variant="soft"
+                      asChild
+                    >
+                      <Link href={`/me/bots/${bot.id}/update`}>
+                        <PencilIcon size="14" />
+                      </Link>
+                    </IconButton>
+                    <IconButton
+                      size="1"
+                      className="cursor-pointer"
+                      variant="soft"
+                      onClick={() =>
+                        deleteBotMutation.mutate({ botId: bot.id })
+                      }
+                    >
+                      <TrashIcon size="14" />
+                    </IconButton>
+                    <IconButton
+                      size="1"
+                      className="cursor-pointer"
+                      variant="soft"
+                      asChild
+                    >
+                      <Link href={`/me/bots/${bot.id}/files`}>
+                        <FileIcon size="14" />
+                      </Link>
+                    </IconButton>
+                  </Box>
                 )}
               </Box>
             </Card>
