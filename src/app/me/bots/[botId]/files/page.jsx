@@ -21,7 +21,17 @@ import { useEdgeStore } from "@/lib/edgestore/edgestore";
 export default function BotFilesPage({ params }) {
   const router = useRouter();
   const { botId } = params;
-  const { edgestore } = useEdgeStore(); 
+  const { edgestore } = useEdgeStore();
+  const getBot = trpc.user.getBot.useQuery(
+    {
+      botId,
+    },
+    {
+      onSuccess: (data) => {
+        console.log("[getBot] Data: ", data);
+      },
+    }
+  );
   const getUser = trpc.user.get.useQuery(undefined);
   const getBotFiles = trpc.user.getBotFiles.useQuery(
     {
@@ -52,20 +62,32 @@ export default function BotFilesPage({ params }) {
 
   return (
     <Box className="p-6">
+      <Heading>{getBot?.data?.name}</Heading>
+      <Text size="1" color="gray" className="w-[300px]" as="p">
+        {getBot?.data?.description}
+      </Text>
+      {getBot?.data && (
+        <Text size="1" color="gray" className="my-1 w-[300px]" as="p">
+          Word Count: {(getBot?.data?.trainingTokenCount || 0) / 1.3}
+        </Text>
+      )}
       <Tabs.Root defaultValue="view">
         <Tabs.List>
           <Tabs.Trigger value="view">View Files</Tabs.Trigger>
           <Tabs.Trigger value="upload">Upload Files</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="view">
-          <Box className="w-full py-4">
+          <Box className="w-full py-4 flex gap-4 flex-wrap">
             {getBotFiles?.isLoading ? (
               <Flex className="w-full h-full items-center justify-center py-4">
                 <Spinner />
               </Flex>
             ) : getBotFiles?.data?.data?.length > 0 ? (
               getBotFiles?.data?.data?.map((file, idx) => (
-                <Box className="bg-white p-3 w-fit rounded flex flex-col items-center relative gap-1">
+                <Box
+                  className="bg-white p-3 w-[100px] rounded flex flex-col items-center relative gap-1 overflow-hidden"
+                  key={idx}
+                >
                   <DropdownMenu.Root>
                     <DropdownMenu.Trigger className="absolute top-1 right-1 cursor-pointer text-gray-700">
                       <EllipsisVerticalIcon size="16" />
@@ -79,7 +101,9 @@ export default function BotFilesPage({ params }) {
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>
                   <FileIcon size="36" className="text-gray-500" />
-                  <Text size="2">{file.metadata.name}</Text>
+                  <Text size="1" as="p" className="truncate w-full text-center">
+                    {file.metadata.name}
+                  </Text>
                 </Box>
               ))
             ) : (

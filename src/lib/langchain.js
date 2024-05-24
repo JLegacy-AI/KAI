@@ -21,7 +21,7 @@ import { TRPCError } from "@trpc/server";
 
 const embeddings = new VoyageEmbeddings({
   apiKey: VOYAGE_API_KEY,
-  modelName: "voyage-2",
+  modelName: "voyage-2", // context Length is 4000 tokens
 });
 const pinecone = new Pinecone({
   apiKey: PINECONE_API_KEY,
@@ -87,7 +87,10 @@ export async function embedAndStoreText(text, metadata = {}, options = {}) {
 
     // Split the text into chunks, also add metadata to each chunk
     let textChunks = await splitter.createDocuments([text], [metadata]);
+    console.log("Total Chunks: ", textChunks.length);
+
     const pineconeRes = await PineconeStore.fromDocuments(
+      // only select the first 5 chunks
       textChunks,
       embeddings,
       {
@@ -96,7 +99,8 @@ export async function embedAndStoreText(text, metadata = {}, options = {}) {
         ...options,
       }
     );
-    console.log("[embedAndStoreText] Pinecone Res:", pineconeRes);
+
+    // console.log("[embedAndStoreText] Pinecone Res:", pineconeRes);
     return { message: "Text embedded and stored successfully" };
   } catch (err) {
     console.log("[error@embedAndStoreText]: ", err.message);
