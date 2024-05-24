@@ -12,4 +12,5 @@ export const PINECONE_INDEX_DIMENSION = process.env.PINECONE_INDEX_DIMENSION // 
   ? parseInt(process.env.PINECONE_INDEX_DIMENSION)
   : 1024;
 export const VOYAGE_API_KEY = process.env.VOYAGE_API_KEY; // Embeddings Model API KEY
-export const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY; // Claude LLM API Key
+export const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY; // Claude LLM API 
+export const TOGETHER_AI_API_KEY = process.env.TOGETHER_AI_API_KEY; // TogetherAI API KEY

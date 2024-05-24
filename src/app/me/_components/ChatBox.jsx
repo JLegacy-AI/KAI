@@ -11,6 +11,7 @@ import {
   Separator,
   IconButton,
   Spinner,
+  Select,
 } from "@radix-ui/themes";
 import { twMerge } from "tailwind-merge";
 import TopBarWrapper from "./TopBarWrapper";
@@ -35,8 +36,12 @@ export default function ChatBox({
   isChatSessionLoading,
   askAiMutation,
   isAskAiMutationLoading,
+  userId,
 }) {
+  const getBots = trpc.user.getBots.useQuery();
   const [userInput, setUserInput] = useState("");
+  const [selectedBotId, setSelectedBotId] = useState(null);
+  const [isCreatingChatSession, setIsCreatingChatSession] = useState(false);
   const searchParams = useSearchParams();
 
   return (
@@ -49,7 +54,65 @@ export default function ChatBox({
       {/* Top Bar */}
       {TopBar}
       {/* Messages */}
-      {chatSession?.messages?.length > 0 ? (
+
+      {!searchParams.get("chat_session_id") ? (
+        <Flex
+          direction="column"
+          className="w-full h-full items-center justify-center bg-gray-50"
+        >
+          {/* <Text as="p">Select an exisiting chat session</Text> */}
+          {isCreatingChatSession ? (
+            <Spinner />
+          ) : (
+            <Box className="flex flex-col w-[400px] gap-2">
+              {getBots?.data && (
+                <Select.Root
+                  placeholder="Choose Bot"
+                  onValueChange={(val) => setSelectedBotId(val)}
+                >
+                  <Select.Trigger placeholder="Choose Bot" />
+                  <Select.Content size="1">
+                    {getBots?.data?.map((bot, idx) => (
+                      <Select.Item key={idx} value={bot.id}>
+                        {bot.name}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
+              )}
+              <TextArea
+                placeholder="Ask Anything"
+                className="border-0 outline-none"
+                onChange={(e) => {
+                  setUserInput(e.target.value);
+                }}
+              />
+              <Button
+                onClick={async () => {
+                  if (!selectedBotId) return toast.error("Please select a bot");
+                  console.log("UserInput: ", userInput.length);
+                  if (!userInput || userInput.length < 2)
+                    return toast.error(
+                      "Query must be at least 10 characters long"
+                    );
+
+                  setUserInput("");
+                  setIsCreatingChatSession(true);
+                  await askAiMutation.mutateAsync({
+                    question: { content: userInput },
+                    displayMessage: userInput,
+                    chatSessionId: searchParams.get("chat_session_id") || "new",
+                    botId: selectedBotId,
+                  });
+                  setIsCreatingChatSession(false);
+                }}
+              >
+                Ask
+              </Button>
+            </Box>
+          )}
+        </Flex>
+      ) : chatSession?.messages?.length > 0 ? (
         <ScrollArea className="flex-1 px-4 bg-gray-50" scrollbars="vertical">
           {chatSession.messages.map((msg, idx) => {
             return <MessageBox key={idx} {...msg} />;
@@ -74,32 +137,33 @@ export default function ChatBox({
         </Box>
       )}
       {/* Input */}
-      <Box className="border-t p-4">
-        <TextArea
-          placeholder={l("send a message")}
-          value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
-        />
-        <Flex className="items-center justify-between mt-2">
-          <Button
-            size="1"
-            className="cursor-pointer"
-            // onClick={handleSendMessage}
-            onClick={() => {
-              askAiMutation.mutate({
-                // TODO check if chatSessionId is not provided, also get a bot id
-                question: { content: userInput },
-                displayMessage: userInput,
-                chatSessionId: searchParams.get("chat_session_id") || "new",
-              });
-              setUserInput("");
-            }}
-            disabled={isAskAiMutationLoading}
-          >
-            {l("Send")}
-          </Button>
-        </Flex>
-      </Box>
+      {searchParams.get("chat_session_id") && (
+        <Box className="border-t p-4">
+          <TextArea
+            placeholder={l("send a message")}
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+          />
+          <Flex className="items-center justify-between mt-2">
+            <Button
+              size="1"
+              className="cursor-pointer"
+              // onClick={handleSendMessage}
+              onClick={() => {
+                askAiMutation.mutate({
+                  question: { content: userInput },
+                  displayMessage: userInput,
+                  chatSessionId: searchParams.get("chat_session_id") || "new",
+                });
+                setUserInput("");
+              }}
+              disabled={isAskAiMutationLoading}
+            >
+              {l("Send")}
+            </Button>
+          </Flex>
+        </Box>
+      )}
     </Box>
   );
 }

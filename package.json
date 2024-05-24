@@ -23,7 +23,7 @@
     "@trpc/client": "^10.45.2",
     "@trpc/react-query": "^10.45.2",
     "@trpc/server": "^10.45.2",
-    "axios": "^1.6.8",
+    "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
     "file-to-text": "^1.0.3",
     "js-tiktoken": "^1.0.11",

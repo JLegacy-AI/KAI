@@ -17,6 +17,7 @@ import { esBackendClient } from "@/lib/edgestore/edgestoreServer";
 import { askAiSchema } from "@/lib/zodSchemas";
 import { getContentFromFileUrl } from "@/lib/utils";
 import botModel from "../models/bot.model";
+import { askTogetherAI } from "@/lib/togetherAI";
 
 export const userProcedure = publicProcedure.use(async (opts) => {
   const { ctx, next } = opts;
@@ -66,14 +67,32 @@ export const userRouter = router({
     const { question: query, chatSessionId } = opts.input;
 
     let thisChatSession = null;
+    let aiRes;
 
     // Create a new chat session if the chatSessionId is "new", otherwise use the one with given id
     if (chatSessionId === "new") {
       console.log("[askAI] Creating a new session");
+
+      // We are asking first in new chat so if any occurs, we do not create a new chat session
+      aiRes = await askTogetherAI({
+        question: query.content,
+        chatHistory: [],
+        botId: opts.input.botId,
+        maxTokens: remainingTokens,
+      });
+
+      if (aiRes.error) {
+        throw new TRPCError({
+          code: aiRes.code ?? "INTERNAL_SERVER_ERROR",
+          message: aiRes.error,
+        });
+      }
+
       thisChatSession = await ChatSessionModel.create({
-        title: opts.input.displayMessage.slice(0, 100),
+        title: opts.input.question.content.slice(0, 100),
         messages: [],
         user: user._id,
+        bot: opts.input.botId,
       });
 
       user.chats.push(thisChatSession._id);
@@ -99,26 +118,14 @@ export const userRouter = router({
       }
     }
 
-    let aiRes;
+    const chatHistory = thisChatSession.messages;
 
-    if (queryType === "question") {
-      const chatHistory = messagesToChat(thisChatSession.messages);
-
-      aiRes = await askAi({
-        question: query.content,
-        chatHistory,
-        contextType: query.contextType,
-        userId: opts.ctx.user.id,
-        maxTokens: remainingTokens,
-      });
-
-      if (aiRes.error) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: aiRes.error,
-        });
-      }
-    }
+    aiRes = await askTogetherAI({
+      question: query.content,
+      chatHistory,
+      botId: thisChatSession.bot,
+      maxTokens: remainingTokens,
+    });
 
     if (aiRes.error) {
       throw new TRPCError({
@@ -128,7 +135,7 @@ export const userRouter = router({
     }
 
     thisChatSession.messages.push({
-      message: opts.input.displayMessage,
+      message: opts.input.question.content,
       role: "user",
     });
 
@@ -241,6 +248,32 @@ export const userRouter = router({
       await user.save();
 
       return newBot;
+    }),
+  getBot: userProcedure
+    .input(
+      z.object({
+        botId: z.string(),
+      })
+    )
+    .query(async (opts) => {
+      const user = opts.ctx.user;
+      const { botId } = opts.input;
+
+      const bot = await botModel.findById(botId);
+
+      if (!bot) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: l("Bot not found"),
+        });
+      }
+
+      if (bot.accessType === "private" && !user.bots.includes(botId)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: l("You are not authorized to access this bot"),
+        });
+      }
     }),
   getBots: userProcedure.query(async (opts) => {
     const user = opts.ctx.user;

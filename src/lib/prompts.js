@@ -35,7 +35,7 @@ export const prompts = {
 export const prompts = {
   question: (contextText) => {
     return `${l(
-      "You are a helpful legal assistant, You are given context, a chat history and the user's latest question. You are to extract information from the context and chat history to provide an answer to the user's question. If you are unable to provide an answer, you can ask clarifying questions"
+      "You are a specialised assitant, You are given context to specialise in, a chat history and the user's latest question. You are to extract information from the context and chat history to provide an answer to the user's question. If you are unable to provide an answer, you can ask clarifying questions. {your answer}"
     )}. \n\n ${l("Context")}: \n ${contextText}`;
   },
   summarize: (text) => {

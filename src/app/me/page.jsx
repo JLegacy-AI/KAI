@@ -87,7 +87,7 @@ export default function UserDashboardPage() {
 
       const thisChatSessionId = searchParams.get("chat_session_id");
       const newUserMessage = {
-        message: data.displayMessage,
+        message: data.question.content,
         role: "user",
         tokensUsed: 0,
         usage: {
@@ -221,6 +221,7 @@ export default function UserDashboardPage() {
           chatSession={getChatSession.data}
           askAiMutation={askAi}
           isAskAiMutationLoading={isAskAiLoading.loading}
+          userId={getUser?.data?.id}
           TopBar={
             <TopBarWrapper className="w-full py-2 px-4 flex items-center justify-between">
               <Heading>{l("Chat")}</Heading>

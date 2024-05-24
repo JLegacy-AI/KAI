@@ -26,21 +26,25 @@ export const userSignupSchema = z
 export const askAiSchema = z
   .object({
     chatSessionId: z.string(),
-    displayMessage: z.string(), // The message to be displayed in the chat, from user side
+    // displayMessage: z.string(), // The message to be displayed in the chat, from user side
     // Query Types and their required fields
     question: z.object({
-      content: z.string(),
+      content: z.string().min(3, "Question must be at least 3 characters long"),
     }),
+    botId: z.string().optional(),
   })
   .refine(
     (schema) => {
       // Check the the field for the query type is present
-      return !!schema[schema.queryType];
+      if (schema.chatSessionId === "new" && !schema.botId) {
+        return false;
+      }
+      return true;
     },
-    (schema) => ({
-      message: `The field for the query type ${schema.queryType} is required`,
-      path: [schema.queryType],
-    })
+    {
+      message: `BotId is required for new chat session`,
+      path: ["botId"],
+    }
   );
 
 export function getZodErrorsObj(errors) {

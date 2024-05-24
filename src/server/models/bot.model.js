@@ -4,6 +4,7 @@ const botSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
+    prompt: {type: String, required: false },
     // accessType can be "public" or "private"
     accessType: {
       type: String,

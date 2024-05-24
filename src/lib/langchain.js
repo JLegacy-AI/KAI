@@ -203,7 +203,8 @@ export function messagesToChat(messages) {
   return chatHistory;
 }
 
-function formatAiResponse(res) {
+function formatClaudeAiResponse(res) {
+  console.log("[formatClaudeAiResponse], Res: ", res);
   return {
     answer: res.content,
     usage: {
@@ -216,21 +217,19 @@ function formatAiResponse(res) {
   };
 }
 
+function formatAiResponse(res) {}
+
 // Provide userId if contextType is "local"
 export async function askAi({
   question,
   chatHistory,
   contextType,
   userId,
+  botId,
   log = false,
   maxTokens = 0,
 }) {
   try {
-    console.log("[askAi] ContextType: ", contextType);
-
-    if (contextType === "local" && !userId)
-      throw new Error("userId is required for local context type");
-
     const chatHistoryTokens = countTokens(
       chatHistory.map((msg) => msg?.content).join("") + ` ${question}`
     );
@@ -241,13 +240,20 @@ export async function askAi({
     const relevantDocs = await findSimilarDocuments({
       query: question,
       noOfDocs: 3,
-      namespace: contextType === "local" ? "user" : "admin",
-      filter: contextType === "local" ? { userId } : {},
+      namespace: "user",
+      filter: {
+        botId: botId,
+      },
     });
 
-    const contextText = relevantDocs.map((doc) => doc.pageContent).join("");
+    console.log("[askAI], Relevant Docs: ", relevantDocs);
 
-    if (chatHistoryTokens + countTokens(contextText) > maxTokens) {
+    if (relevantDocs.error) return relevantDocs;
+
+    const contextText = relevantDocs.map((doc) => doc.pageContent).join("");
+    const contextTextTokens = countTokens(contextText);
+
+    if (chatHistoryTokens + contextTextTokens > maxTokens) {
       return { error: "Max Tokens Limit Reached", code: "FORBIDDEN" };
     }
 
@@ -256,11 +262,20 @@ export async function askAi({
       ...(chatHistory ?? []),
       new HumanMessage(question),
     ];
-    
+
+    console.log("[askAI], Chat: ", question, chat);
 
     const res = await llm.invoke(chat);
-    if (log) console.log("[askAi], Res:", res);
-    return formatAiResponse(res);
+    const resTokens = countTokens(res);
+    if (log || true) console.log("[askAi], Res:", res);
+    return {
+      answer: res,
+      usage: {
+        inputTokens: chatHistoryTokens + contextTextTokens,
+        outputTokens: resTokens,
+      },
+      tokensUsed: chatHistoryTokens + contextTextTokens + resTokens,
+    };
   } catch (err) {
     console.log("[askAI], Error: ", err.message);
     return { error: err.message };

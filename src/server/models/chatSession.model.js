@@ -38,6 +38,10 @@ const chatSessionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    bot: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Bot",
+    },
   },
   {
     timestamps: true,
@@ -64,8 +68,6 @@ chatSessionSchema.post(
 chatSessionSchema.set("toJSON", {
   virtuals: true,
 });
-
-
 
 const chatSessionModel =
   mongoose?.models?.ChatSession ||
