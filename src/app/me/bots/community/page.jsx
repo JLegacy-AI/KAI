@@ -10,8 +10,6 @@ import {
   Card,
   Spinner,
 } from "@radix-ui/themes";
-import Link from "next/link";
-import Navbar from "../_components/Navbar";
 import { trpc } from "@/app/_trpc/client";
 
 export default function BotsCommunityPage() {
@@ -43,6 +41,12 @@ export default function BotsCommunityPage() {
       {getCommunityBots?.isLoading ? (
         <Box className="w-full flex items-center justify-center">
           <Spinner />
+        </Box>
+      ) : getCommunityBots?.data?.length === 0 ? (
+        <Box className="w-full my-2">
+          <Text className="text-center" as="p">
+            No Bots Found
+          </Text>
         </Box>
       ) : (
         <Box className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-4">

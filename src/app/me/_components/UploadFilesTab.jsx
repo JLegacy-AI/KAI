@@ -19,6 +19,7 @@ export default function UploadFilesTab({
   /* Optional */
   moreInput,
   dropzoneClassname,
+  onUploadComplete
 }) {
   const [fileStates, setFileStates] = useState([]);
   const { edgestore } = useEdgeStore();
@@ -93,6 +94,7 @@ export default function UploadFilesTab({
                       // so that the user can see the progress bar at 100%
                       await new Promise((resolve) => setTimeout(resolve, 1000));
                       updateFileProgress(addedFileState.key, "COMPLETE");
+                      onUploadComplete?.(addedFileState.key);
                     }
                   },
                 });

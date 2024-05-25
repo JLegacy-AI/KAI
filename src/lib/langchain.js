@@ -6,7 +6,7 @@ import {
 } from "@/lib/constants";
 import { VoyageEmbeddings } from "@langchain/community/embeddings/voyage";
 import { PineconeStore } from "@langchain/pinecone";
-import { Pinecone } from "@pinecone-database/pinecone";
+import { pcIndex } from "@/lib/pinecone";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { TogetherAI } from "@langchain/community/llms/togetherai";
@@ -18,15 +18,12 @@ import {
 import { prompts } from "./prompts";
 import { countTokens } from "./utils";
 import { TRPCError } from "@trpc/server";
+import { embedAndUpsertTexts } from "./voyageAI";
 
 const embeddings = new VoyageEmbeddings({
   apiKey: VOYAGE_API_KEY,
   modelName: "voyage-2", // context Length is 4000 tokens
 });
-const pinecone = new Pinecone({
-  apiKey: PINECONE_API_KEY,
-});
-const pcIndex = pinecone.Index(PINECONE_INDEX_NAME);
 const llm = new TogetherAI({
   temperature: 0.9,
   model: "Open-Orca/Mistral-7B-OpenOrca",
@@ -41,17 +38,6 @@ const llm = new TogetherAI({
 export async function embedQuery(text) {
   return await embeddings.embedQuery(text);
 }
-
-/**
- *
- * @param {String[]} textDocs
- * @returns vector embeddings of the documents
- */
-/*
-export async function embedDocument(textDocs) {
-  return await embeddings.embedDocument(textDocs);
-}
-*/
 
 /**
  *
@@ -86,9 +72,19 @@ export async function embedAndStoreText(text, metadata = {}, options = {}) {
     });
 
     // Split the text into chunks, also add metadata to each chunk
-    let textChunks = await splitter.createDocuments([text], [metadata]);
+    let textChunks = await splitter.createDocuments([text]);//, [metadata]);
     console.log("Total Chunks: ", textChunks.length);
 
+    const result = await embedAndUpsertTexts({
+      texts: textChunks.map((chunk) => chunk.pageContent),
+      metadata,
+      pcIndex,
+      pcOptions: {
+        namespace: options.namespace ?? "user",
+      },
+    });
+
+    /*
     const pineconeRes = await PineconeStore.fromDocuments(
       // only select the first 5 chunks
       textChunks,
@@ -99,8 +95,12 @@ export async function embedAndStoreText(text, metadata = {}, options = {}) {
         ...options,
       }
     );
+    */
 
+    console.log("[embedAndStoreText] Result: ", result);
     // console.log("[embedAndStoreText] Pinecone Res:", pineconeRes);
+    if (result.error) return { error: result.error };
+
     return { message: "Text embedded and stored successfully" };
   } catch (err) {
     console.log("[error@embedAndStoreText]: ", err.message);

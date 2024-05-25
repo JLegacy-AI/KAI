@@ -18,6 +18,7 @@ import FilesSidebar from "../_components/FilesSidebar";
 import { useEffect } from "react";
 import { FileIcon, PencilIcon, TrashIcon } from "lucide-react";
 import toast from "react-hot-toast";
+import { convertTokenToWordCount } from "../utils";
 
 export default function ViewBotsPage() {
   const user = trpc.user.get.useQuery(undefined, {});
@@ -50,6 +51,10 @@ export default function ViewBotsPage() {
         <Box className="w-full flex items-center justify-center">
           <Spinner />
         </Box>
+      ) : getBots?.data?.length === 0 ? (
+        <Box className="w-full my-2">
+          <Text className="text-center" as="p">No Bots Found</Text>
+        </Box>
       ) : (
         <Box className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-4">
           {getBots?.data?.map((bot, idx) => (
@@ -66,10 +71,23 @@ export default function ViewBotsPage() {
               <Box className="mt-2 flex justify-between items-center">
                 <Text as="p" size="2" color="gray">
                   {/* Convert token count to word count */}
-                  Word Count: {bot.trainingTokenCount / 1.3}
+                  Word Count:{" "}
+                  {new Intl.NumberFormat().format(
+                    convertTokenToWordCount(bot.trainingTokenCount)
+                  )}
                 </Text>
                 {user?.data?.id == bot.creator && (
                   <Box className="flex gap-2">
+                    <IconButton
+                      size="1"
+                      className="cursor-pointer"
+                      variant="soft"
+                      asChild
+                    >
+                      <Link href={`/me/bots/${bot.id}/files`}>
+                        <FileIcon size="14" />
+                      </Link>
+                    </IconButton>
                     <IconButton
                       size="1"
                       className="cursor-pointer"
@@ -89,16 +107,6 @@ export default function ViewBotsPage() {
                       }
                     >
                       <TrashIcon size="14" />
-                    </IconButton>
-                    <IconButton
-                      size="1"
-                      className="cursor-pointer"
-                      variant="soft"
-                      asChild
-                    >
-                      <Link href={`/me/bots/${bot.id}/files`}>
-                        <FileIcon size="14" />
-                      </Link>
                     </IconButton>
                   </Box>
                 )}

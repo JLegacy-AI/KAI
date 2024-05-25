@@ -17,6 +17,7 @@ import { trpc } from "@/app/_trpc/client";
 import { EllipsisVerticalIcon, FileIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
+import { convertTokenToWordCount } from "@/app/me/utils";
 
 export default function BotFilesPage({ params }) {
   const router = useRouter();
@@ -68,7 +69,10 @@ export default function BotFilesPage({ params }) {
       </Text>
       {getBot?.data && (
         <Text size="1" color="gray" className="my-1 w-[300px]" as="p">
-          Word Count: {(getBot?.data?.trainingTokenCount || 0) / 1.3}
+          Word Count: {" "} {new Intl.NumberFormat().format(
+            convertTokenToWordCount(getBot?.data?.trainingTokenCount)
+          )}
+          {/* getBot?.data?.trainingTokenCount */}
         </Text>
       )}
       <Tabs.Root defaultValue="view">
@@ -119,6 +123,10 @@ export default function BotFilesPage({ params }) {
             tokensAvailable={getAvailableTokens()}
             moreInput={{
               botId: botId,
+            }}
+            onUploadComplete={() => {
+              getBotFiles.refetch();
+              getBot.refetch(); // Refetching bot because trainingTokenCount might have changed
             }}
           />
         </Tabs.Content>

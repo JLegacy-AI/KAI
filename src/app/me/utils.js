@@ -1,6 +1,5 @@
 import { l } from "@/lib/language";
 
-
 export function createDisplayMessage(queryType, query) {
   let displayMessage = "";
 
@@ -37,4 +36,9 @@ export function getUsedTokensPercentage(tokensGranted, tokensUsed) {
   if (tokensUsed <= 0) return percentage;
   percentage = Math.min(Math.round((tokensUsed / tokensGranted) * 100), 100);
   return percentage;
+}
+
+export function convertTokenToWordCount(tokenCount) {
+  let count = tokenCount ? Math.round(tokenCount / 1.3) : 0;
+  return Math.round(count);
 }

@@ -68,8 +68,14 @@ const edgeStoreRouter = es.router({
       const user = await userModel.findById(ctx.userId);
       if (!user) {
         console.log(
-          "[edgestore-userKbFiles] beforeUpload, User not found"
+          `[edgestore-userKbFiles] beforeUpload, User:${ctx.userId} not found`
         );
+        return false;
+      }
+
+      const bot = await botModel.findById(input.botId);
+      if (!bot) {
+        console.log(`[edgestore-userKbFiles] beforeUpload, Bot:${bot.id} not found`);
         return false;
       }
 
@@ -109,9 +115,8 @@ const edgeStoreRouter = es.router({
       await user.save();
       
       // update training token count in bot
-      await botModel.findByIdAndUpdate(input.botId, {
-        $inc: { trainingTokensCount: fileTextTokens }
-      });
+      bot.trainingTokenCount = bot.trainingTokenCount + fileTextTokens;
+      await bot.save();
 
       return true;
     })
