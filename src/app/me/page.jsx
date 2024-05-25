@@ -140,6 +140,7 @@ export default function UserDashboardPage() {
       );
 
       getChatSession.refetch();
+      getUser.refetch(); // Refetch the user to update the token count
     },
     onError: (error) => {
       toast.error(error.message);

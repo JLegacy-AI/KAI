@@ -44,6 +44,19 @@ export default function ChatBox({
   const [isCreatingChatSession, setIsCreatingChatSession] = useState(false);
   const searchParams = useSearchParams();
 
+  function handleSendMessage() {
+
+    let uInput = userInput.trim();
+    if (!uInput || uInput?.length == 0) return;
+
+    askAiMutation.mutate({
+      question: { content: userInput },
+      displayMessage: userInput,
+      chatSessionId: searchParams.get("chat_session_id") || "new",
+    });
+    setUserInput("");
+  }
+
   return (
     <Box
       className={twMerge(
@@ -138,25 +151,26 @@ export default function ChatBox({
       )}
       {/* Input */}
       {searchParams.get("chat_session_id") && (
-        <Box className="border-t p-4">
+        <Box
+          className="border-t p-4"
+        >
           <TextArea
             placeholder={l("send a message")}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
+            onKeyUp={(e) => {
+              e.preventDefault();
+              if(isAskAiMutationLoading) return;
+              if (e.keyCode == 13 && e.shiftKey == false) {
+                handleSendMessage();
+              }
+            }}
           />
           <Flex className="items-center justify-between mt-2">
             <Button
               size="1"
               className="cursor-pointer"
-              // onClick={handleSendMessage}
-              onClick={() => {
-                askAiMutation.mutate({
-                  question: { content: userInput },
-                  displayMessage: userInput,
-                  chatSessionId: searchParams.get("chat_session_id") || "new",
-                });
-                setUserInput("");
-              }}
+              onClick={handleSendMessage}
               disabled={isAskAiMutationLoading}
             >
               {l("Send")}

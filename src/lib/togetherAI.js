@@ -3,7 +3,10 @@ import { countTokens } from "./utils";
 import { findSimilarDocuments } from "./langchain";
 import { TOGETHER_AI_API_KEY } from "./constants";
 
-export async function chatCompletion(messages, model = "Open-Orca/Mistral-7B-OpenOrca") {
+export async function chatCompletion(
+  messages,
+  model = "Open-Orca/Mistral-7B-OpenOrca"
+) {
   try {
     const url = "https://api.together.xyz/v1/chat/completions";
     const response = await axios.post(
@@ -12,6 +15,7 @@ export async function chatCompletion(messages, model = "Open-Orca/Mistral-7B-Ope
         messages,
         model,
         temperature: 0.5,
+        max_tokens: 4000,
       },
       {
         headers: {
@@ -41,7 +45,7 @@ export async function askTogetherAI({
 }) {
   try {
     const chatHistoryTokens = countTokens(
-      chatHistory.map((msg) => msg?.content).join("") + ` ${question}`
+      chatHistory.map((msg) => msg.message).join("") + ` ${question}`
     );
 
     if (chatHistoryTokens > maxTokens)
@@ -68,14 +72,13 @@ export async function askTogetherAI({
     const chat = [
       {
         role: "system",
-        content:
-          `You are a helpful assistant. You are to base your responses on the chat history and provided context, in order to provide the best possible response to the user's latest question.
+        content: `You are a helpful assistant. You are to base your responses on the chat history and provided context, in order to provide the best possible response to the user's latest question.
           ${botPrompt ? `Additionally, ${botPrompt}` : ""},
           Context: ${contextText}`,
       },
       ...(chatHistory?.map((m) => ({
         role: m.role == "user" ? "user" : "assistant",
-        content: m.content,
+        content: m.message,
       })) || []),
       { role: "user", content: question },
     ];
@@ -84,15 +87,13 @@ export async function askTogetherAI({
 
     if (response.error) return { error: response.error };
     return {
-        answer: response.choices[0].message.content,
-        usage: {
-          inputTokens: response.usage.prompt_tokens,
-          outputTokens: response.usage.completion_tokens,
-        },
-        tokensUsed: response.usage.total_tokens,
-
-    }
-
+      answer: response.choices[0].message.content,
+      usage: {
+        inputTokens: response.usage.prompt_tokens,
+        outputTokens: response.usage.completion_tokens,
+      },
+      tokensUsed: response.usage.total_tokens,
+    };
   } catch (err) {
     console.log("[error@askTogetherAI]: ", err.message);
     return { error: err.message };
