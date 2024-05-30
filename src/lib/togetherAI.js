@@ -30,10 +30,9 @@ export async function chatCompletion(
     return response.data;
   } catch (error) {
     if (error instanceof axios.AxiosError) {
-      console.error(error.response.data);
-      return { error: error.response.data.message };
+      if(error.response.data.message) return {error: error.response.data.message}
+      return { error: error.response.data.error.message };
     }
-
     return { error: error.message };
   }
 }
@@ -87,6 +86,8 @@ export async function askTogetherAI({
     ];
 
     const response = await chatCompletion(chat, model);
+
+    console.log("[chatCompletion] RESPONSE: ", response);
 
     if (response.error) return { error: response.error };
     return {

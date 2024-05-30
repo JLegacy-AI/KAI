@@ -75,7 +75,7 @@ export default function SettingsModal({
               className="w-full my-4"
             />
             <Text as="p" className="text-center w-full" size="2">
-              {l("Buy 1,000 Tokens for $1")}
+              {l("Buy 10,000 Tokens for $1")}
             </Text>
           </Box>
         ) : (
@@ -91,7 +91,7 @@ export default function SettingsModal({
 
           <Button
             onClick={() => buyTokensMutation.mutate({
-              tokens: 1000000,
+              tokens: 10000,
             })}
             loading={buyTokensMutation.isLoading}
           >

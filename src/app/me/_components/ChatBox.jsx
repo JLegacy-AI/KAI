@@ -50,12 +50,9 @@ export default function ChatBox({
 
   function handleSendMessage() {
 
-    console.log("Sending Message...");
-
     let uInput = userInput.trim();
     if (!uInput || uInput?.length == 0) return;
 
-    console.log("SELECTED MODEL: ", selectedModelId);
     askAiMutation.mutate({
       question: { content: userInput },
       displayMessage: userInput,

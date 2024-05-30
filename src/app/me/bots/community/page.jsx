@@ -11,6 +11,7 @@ import {
   Spinner,
 } from "@radix-ui/themes";
 import { trpc } from "@/app/_trpc/client";
+import { convertTokenToWordCount } from "../../utils";
 
 export default function BotsCommunityPage() {
   const getCommunityBots = trpc.user.getCommunityBots.useQuery(undefined, {
@@ -63,7 +64,10 @@ export default function BotsCommunityPage() {
               </Box>
               <Box className="mt-2 flex justify-between items-center">
                 <Text as="p" size="2" color="gray">
-                  Word Count: 20
+                  Word Count:{" "}
+                  {new Intl.NumberFormat().format(
+                    convertTokenToWordCount(bot.trainingTokenCount)
+                  )}
                 </Text>
                 <Button
                   size="1"
@@ -73,7 +77,7 @@ export default function BotsCommunityPage() {
                     })
                   }
                 >
-                  Add Bot
+                  Add to Collection
                 </Button>
               </Box>
             </Card>

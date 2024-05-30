@@ -145,7 +145,7 @@ export default function UserDashboardPage() {
     },
     onError: (error) => {
       toast.error(error.message);
-      console.log("[askAi] onError: ", error.message);
+      console.log("[askAi] onError: ", error);
       setIsAskAiLoading((prev) => ({ ...prev, loading: false }));
     },
     onSettled: (data) => {
