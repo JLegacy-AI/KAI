@@ -28,6 +28,7 @@ import { useSearchParams } from "next/navigation";
 import MessageBox from "./MessageBox";
 import { l } from "@/lib/language";
 import toast from "react-hot-toast";
+import { llms } from "@/lib/llms";
 
 export default function ChatBox({
   className,
@@ -41,18 +42,25 @@ export default function ChatBox({
   const getBots = trpc.user.getBots.useQuery();
   const [userInput, setUserInput] = useState("");
   const [selectedBotId, setSelectedBotId] = useState(null);
+  const [selectedModelId, setSelectedModelId] = useState(
+    "Open-Orca/Mistral-7B-OpenOrca"
+  );
   const [isCreatingChatSession, setIsCreatingChatSession] = useState(false);
   const searchParams = useSearchParams();
 
   function handleSendMessage() {
 
+    console.log("Sending Message...");
+
     let uInput = userInput.trim();
     if (!uInput || uInput?.length == 0) return;
 
+    console.log("SELECTED MODEL: ", selectedModelId);
     askAiMutation.mutate({
       question: { content: userInput },
       displayMessage: userInput,
       chatSessionId: searchParams.get("chat_session_id") || "new",
+      llmId: selectedModelId,
     });
     setUserInput("");
   }
@@ -78,6 +86,20 @@ export default function ChatBox({
             <Spinner />
           ) : (
             <Box className="flex flex-col w-[400px] gap-2">
+              <Select.Root
+                placeholder="Choose Model"
+                onValueChange={(val) => setSelectedModelId(val)}
+                value={selectedModelId}
+              >
+                <Select.Trigger placeholder="Choose Model" />
+                <Select.Content size="1">
+                  {llms.map((model, idx) => (
+                    <Select.Item key={idx} value={model.id}>
+                      {model.name}
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
               {getBots?.data && (
                 <Select.Root
                   placeholder="Choose Bot"
@@ -103,7 +125,8 @@ export default function ChatBox({
               <Button
                 onClick={async () => {
                   if (!selectedBotId) return toast.error("Please select a bot");
-                  console.log("UserInput: ", userInput.length);
+                  if (!selectedBotId)
+                    return toast.error("Please select a model");
                   if (!userInput || userInput.length < 2)
                     return toast.error(
                       "Query must be at least 10 characters long"
@@ -116,6 +139,7 @@ export default function ChatBox({
                     displayMessage: userInput,
                     chatSessionId: searchParams.get("chat_session_id") || "new",
                     botId: selectedBotId,
+                    llmId: selectedModelId,
                   });
                   setIsCreatingChatSession(false);
                 }}
@@ -151,22 +175,35 @@ export default function ChatBox({
       )}
       {/* Input */}
       {searchParams.get("chat_session_id") && (
-        <Box
-          className="border-t p-4"
-        >
+        <Box className="border-t p-4">
           <TextArea
             placeholder={l("send a message")}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             onKeyUp={(e) => {
               e.preventDefault();
-              if(isAskAiMutationLoading) return;
+              if (isAskAiMutationLoading) return;
               if (e.keyCode == 13 && e.shiftKey == false) {
                 handleSendMessage();
               }
             }}
           />
           <Flex className="items-center justify-between mt-2">
+            <Select.Root
+              placeholder="Choose Model"
+              onValueChange={(val) => setSelectedModelId(val)}
+              value={selectedModelId}
+              size="1"
+            >
+              <Select.Trigger placeholder="Choose Model" />
+              <Select.Content>
+                {llms.map((model, idx) => (
+                  <Select.Item key={idx} value={model.id}>
+                    {model.name}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
             <Button
               size="1"
               className="cursor-pointer"

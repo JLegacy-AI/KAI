@@ -5,9 +5,12 @@ import { TOGETHER_AI_API_KEY } from "./constants";
 
 export async function chatCompletion(
   messages,
-  model = "Open-Orca/Mistral-7B-OpenOrca"
+  model // = "Open-Orca/Mistral-7B-OpenOrca"
 ) {
   try {
+
+    // console.log("USING AI MODEL: ", model);
+
     const url = "https://api.together.xyz/v1/chat/completions";
     const response = await axios.post(
       url,
@@ -41,7 +44,7 @@ export async function askTogetherAI({
   botId,
   botPrompt = undefined,
   maxTokens = 0,
-  model = "Open-Orca/Mistral-7B-OpenOrca",
+  model // = "Open-Orca/Mistral-7B-OpenOrca",
 }) {
   try {
     const chatHistoryTokens = countTokens(

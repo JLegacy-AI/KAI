@@ -8,6 +8,7 @@ import {
   Heading,
   Text,
   Spinner,
+  Tooltip,
 } from "@radix-ui/themes";
 import {
   BrainIcon,
@@ -227,31 +228,36 @@ export default function UserDashboardPage() {
             <TopBarWrapper className="w-full py-2 px-4 flex items-center justify-between">
               <Heading>{l("Chat")}</Heading>
               <Box className="flex gap-2">
-                <IconButton
-                  variant="surface"
-                  className="cursor-pointer"
-                  onClick={() => setIsSettingsModalOpen((prev) => !prev)}
-                >
-                  <SettingsIcon size="16px" />
-                </IconButton>
-                <IconButton
-                  variant="surface"
-                  className="cursor-pointer"
-                  onClick={() => setIsFilesSidebarOpen((prev) => !prev)}
-                  asChild
-                >
-                  <Link href="/me/bots">
-                    <BrainIcon size="16px" />
-                  </Link>
-                </IconButton>
-                <IconButton
-                  variant="surface"
-                  className="cursor-pointer"
-                  onClick={() => setIsChatSidebarOpen((prev) => !prev)}
-                >
-                  <MessageSquareTextIcon size="16px" />
-                </IconButton>
-
+                <Tooltip content="Chats">
+                  <IconButton
+                    variant="surface"
+                    className="cursor-pointer"
+                    onClick={() => setIsChatSidebarOpen((prev) => !prev)}
+                  >
+                    <MessageSquareTextIcon size="16px" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip content="Bots">
+                  <IconButton
+                    variant="surface"
+                    className="cursor-pointer"
+                    onClick={() => setIsFilesSidebarOpen((prev) => !prev)}
+                    asChild
+                  >
+                    <Link href="/me/bots">
+                      <BrainIcon size="16px" />
+                    </Link>
+                  </IconButton>
+                </Tooltip>
+                <Tooltip content="Settings">
+                  <IconButton
+                    variant="surface"
+                    className="cursor-pointer"
+                    onClick={() => setIsSettingsModalOpen((prev) => !prev)}
+                  >
+                    <SettingsIcon size="16px" />
+                  </IconButton>
+                </Tooltip>
                 {/* <IconButton
                   variant="surface"
                   className="cursor-pointer"

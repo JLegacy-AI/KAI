@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { l } from "./language";
+import { llms } from "./llms";
 
 export const userLoginSchema = z.object({
   email: z.string().email(),
@@ -32,6 +33,7 @@ export const askAiSchema = z
       content: z.string().min(3, "Question must be at least 3 characters long"),
     }),
     botId: z.string().optional(),
+    llmId: z.string().default("Open-Orca/Mistral-7B-OpenOrca"),
   })
   .refine(
     (schema) => {
@@ -44,6 +46,17 @@ export const askAiSchema = z
     {
       message: `BotId is required for new chat session`,
       path: ["botId"],
+    }
+  )
+  .refine(
+    (schema) => {
+      const llmIds = llms.map((llm) => llm.id);
+      if (llmIds.includes(schema.llmId)) return true;
+      return false;
+    },
+    {
+      message: "Selected LLM doesn't exist",
+      path: ["llmId"],
     }
   );
 

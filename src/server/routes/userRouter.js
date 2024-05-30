@@ -64,7 +64,7 @@ export const userRouter = router({
     const user = opts.ctx.user;
     let remainingTokens = user.tokensGranted - user.tokensUsed;
 
-    const { question: query, chatSessionId } = opts.input;
+    const { question: query, chatSessionId, llmId } = opts.input;
 
     let thisChatSession = null;
     let aiRes;
@@ -79,6 +79,7 @@ export const userRouter = router({
         chatHistory: [],
         botId: opts.input.botId,
         maxTokens: remainingTokens,
+        model: llmId,
       });
 
       if (aiRes.error) {
@@ -125,6 +126,7 @@ export const userRouter = router({
       chatHistory,
       botId: thisChatSession.bot,
       maxTokens: remainingTokens,
+      model: llmId,
     });
 
     if (aiRes.error) {
