@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <EdgeStoreProvider>
           <TrpcProvider>
-            <Theme>
+            <Theme accentColor="blue">
               {/* <div className="absoluter z-10 top-0 left-0">
                 <TranslationButton />
               </div> */}

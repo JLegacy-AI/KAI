@@ -18,6 +18,12 @@ import { askAiSchema } from "@/lib/zodSchemas";
 import { getContentFromFileUrl } from "@/lib/utils";
 import botModel from "../models/bot.model";
 import { askTogetherAI } from "@/lib/togetherAI";
+import Stripe from "stripe";
+import { STRIPE_PRIVATE_KEY } from "@/lib/constants";
+import { headers } from "next/headers";
+import paymentSessionModel from "../models/paymentSession.model";
+
+const stripe = Stripe(STRIPE_PRIVATE_KEY);
 
 export const userProcedure = publicProcedure.use(async (opts) => {
   const { ctx, next } = opts;
@@ -439,5 +445,126 @@ export const userRouter = router({
       // As the metadata filter is not working, we will filter the files manually
       let allFiles = await esBackendClient.userKbFiles.listFiles(options);
       return allFiles;
+    }),
+  createCheckoutSession: userProcedure
+    .input(
+      z.object({
+        productId: z.number(),
+      })
+    )
+    .mutation(async (opts) => {
+      const headersList = headers();
+      const origin = headersList.get("origin") || "http://localhost:3000";
+      const senderUrl =
+        headersList.get("referer") || "http://localhost:3000/me"; // The url the request was originated from
+
+      const user = opts.ctx.user;
+      const { productId } = opts.input;
+
+      const products = [
+        {
+          id: 1,
+          priceInCents: 200,
+          name: "1 Million Tokens",
+        },
+      ];
+
+      const selectedProduct = products.find((p) => p.id == productId);
+
+      if (!selectedProduct)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid Product Id",
+        });
+
+      const checkoutSession = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "payment",
+        metadata: {
+          user_id: user.id,
+        },
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: selectedProduct.name,
+              },
+              unit_amount: selectedProduct.priceInCents,
+            },
+            quantity: 1,
+          },
+        ],
+        success_url: `${origin}/me/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: senderUrl,
+      });
+
+      // console.log("CHECKOUT SESSION: ", checkoutSession);
+      // console.log("CHECKOUT URL: ", checkoutSession.url);
+
+      // user.tokensGranted += tokens;
+      // await user.save();
+
+      return {
+        message: l("Checkout session created successfully."),
+        url: checkoutSession.url,
+      };
+    }),
+  getCheckoutSessionData: userProcedure
+    .input(
+      z.object({
+        sessionId: z.string().min(2),
+      })
+    )
+    .query(async (opts) => {
+      const user = opts.ctx.user;
+      const { sessionId } = opts.input;
+
+      let paymentSession;
+      try {
+        paymentSession = await stripe.checkout.sessions.retrieve(sessionId);
+      } catch (err) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: err.message,
+        });
+      }
+
+      // Check if the session belogns to user
+      if (paymentSession.metadata.user_id != user.id)
+        return new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "The session does not belong to you",
+        });
+
+      // Check if this session has already been used for the user
+      let associatedSession = await paymentSessionModel.findOne({
+        sessionId,
+      });
+
+      if (!associatedSession) {
+        console.log("Creating New Associated Session");
+        associatedSession = await paymentSessionModel.create({
+          sessionId,
+        });
+      }
+
+      if (!associatedSession.paid) {
+        console.log("Granting 1 Million Tokens")
+        user.tokensGranted += 1000000; // 1 Million
+        await user.save();
+        associatedSession.paid = true;
+        await associatedSession.save();
+        /*
+        await paymentSessionModel.findByIdAndUpdate(associatedSession.id, {
+          paid: true,
+        });
+        */
+      }
+
+      return {
+        message: "Payment Successful",
+        customer: paymentSession.customer_details,
+      };
     }),
 });

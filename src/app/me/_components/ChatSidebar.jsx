@@ -126,7 +126,8 @@ export default function ChatSidebar({
           {user && (
             <Box>
               <Text size="1">
-                {user.tokensGranted}/{user.tokensUsed}
+                {new Intl.NumberFormat().format(user.tokensGranted || 0)}/
+                {new Intl.NumberFormat().format(user.tokensUsed || 0)}
               </Text>
               <Progress
                 value={getUsedTokensPercentage(

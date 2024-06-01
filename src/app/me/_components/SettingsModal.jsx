@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Dialog,
   Button,
@@ -13,19 +15,22 @@ import {
   Box,
 } from "@radix-ui/themes";
 import { l } from "@/lib/language";
-import {  layoutDir } from "@/lib/globals";
+import { layoutDir } from "@/lib/globals";
 import { useState } from "react";
 import { getUsedTokensPercentage } from "../utils";
 import toast from "react-hot-toast";
 import { trpc } from "@/app/_trpc/client";
+import { useRouter } from "next/navigation";
 
 export default function SettingsModal({
   isOpen,
   setIsOpen,
   triggerComponent,
   user,
-  onBuyTokens
+  onBuyTokens,
 }) {
+  const router = useRouter();
+
   const buyTokensMutation = trpc.user.buyTokens.useMutation({
     onSuccess: (data) => {
       toast.success(l("Tokens bought successfully"));
@@ -37,6 +42,21 @@ export default function SettingsModal({
       console.log("[error@buyTokensMutation]: ", error.message);
     },
   });
+
+  const createCheckoutSessionMutation =
+    trpc.user.createCheckoutSession.useMutation({
+      onSuccess: (data) => {
+        // toast.success(data.message);
+        console.log("[success@createCheckoutSession] Data: ", data);
+        router.push(data.url);
+        // onBuyTokens?.(data);
+        // console.log("[buyTokensMutation] Data: ", data);
+      },
+      onError: (error) => {
+        toast.error("Failed to buy tokens");
+        console.log("[error@buyTokensMutation]: ", error.message);
+      },
+    });
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
@@ -75,7 +95,7 @@ export default function SettingsModal({
               className="w-full my-4"
             />
             <Text as="p" className="text-center w-full" size="2">
-              {l("Buy 10,000 Tokens for $1")}
+              {l("Buy 1 Million Tokens for $2")}
             </Text>
           </Box>
         ) : (
@@ -90,10 +110,17 @@ export default function SettingsModal({
           </Dialog.Close>
 
           <Button
-            onClick={() => buyTokensMutation.mutate({
-              tokens: 10000,
-            })}
-            loading={buyTokensMutation.isLoading}
+            onClick={() => {
+              createCheckoutSessionMutation.mutate({
+                productId: 1,
+              });
+              /*
+              buyTokensMutation.mutate({
+                tokens: 10000,
+              });
+              */
+            }}
+            loading={createCheckoutSessionMutation.isLoading}
           >
             {l("Buy More Tokens")}
           </Button>
