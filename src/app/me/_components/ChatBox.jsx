@@ -38,6 +38,7 @@ export default function ChatBox({
   askAiMutation,
   isAskAiMutationLoading,
   userId,
+  botId,
 }) {
   const getBots = trpc.user.getBots.useQuery();
   const [userInput, setUserInput] = useState("");
@@ -49,7 +50,6 @@ export default function ChatBox({
   const searchParams = useSearchParams();
 
   function handleSendMessage() {
-
     let uInput = userInput.trim();
     if (!uInput || uInput?.length == 0) return;
 
@@ -100,7 +100,9 @@ export default function ChatBox({
               {getBots?.data && (
                 <Select.Root
                   placeholder="Choose Bot"
-                  onValueChange={(val) => setSelectedBotId(val)}
+                  onValueChange={(val) => {
+                    setSelectedBotId(val);
+                  }}
                 >
                   <Select.Trigger placeholder="Choose Bot" />
                   <Select.Content size="1">
@@ -186,29 +188,38 @@ export default function ChatBox({
             }}
           />
           <Flex className="items-center justify-between mt-2">
-            <Select.Root
-              placeholder="Choose Model"
-              onValueChange={(val) => setSelectedModelId(val)}
-              value={selectedModelId}
-              size="1"
-            >
-              <Select.Trigger placeholder="Choose Model" />
-              <Select.Content>
-                {llms.map((model, idx) => (
-                  <Select.Item key={idx} value={model.id}>
-                    {model.name}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
-            <Button
-              size="1"
-              className="cursor-pointer"
-              onClick={handleSendMessage}
-              disabled={isAskAiMutationLoading}
-            >
-              {l("Send")}
-            </Button>
+            <Box>
+              {getBots?.data && chatSession && (
+                <Text size="2" className="mr-2">
+                  Bot: {getBots.data.find((b) => b.id == chatSession.bot)?.name}
+                </Text>
+              )}
+            </Box>
+            <Box>
+              <Select.Root
+                placeholder="Choose Model"
+                onValueChange={(val) => setSelectedModelId(val)}
+                value={selectedModelId}
+                size="1"
+              >
+                <Select.Trigger placeholder="Choose Model" />
+                <Select.Content>
+                  {llms.map((model, idx) => (
+                    <Select.Item key={idx} value={model.id}>
+                      {model.name}
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
+              <Button
+                size="1"
+                className="cursor-pointer ml-3"
+                onClick={handleSendMessage}
+                disabled={isAskAiMutationLoading}
+              >
+                {l("Send")}
+              </Button>
+            </Box>
           </Flex>
         </Box>
       )}

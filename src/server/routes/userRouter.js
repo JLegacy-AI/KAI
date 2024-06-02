@@ -70,6 +70,7 @@ export const userRouter = router({
 
       // As the metadata filter is not working, we will filter the files manually
       let allFiles = await esBackendClient.userKbFiles.listFiles(options);
+
       return allFiles;
     }),
   "ai.ask": userProcedure.input(askAiSchema).mutation(async (opts) => {
@@ -80,6 +81,8 @@ export const userRouter = router({
 
     let thisChatSession = null;
     let aiRes;
+
+    
 
     // Create a new chat session if the chatSessionId is "new", otherwise use the one with given id
     if (chatSessionId === "new") {
@@ -136,7 +139,7 @@ export const userRouter = router({
     aiRes = await askTogetherAI({
       question: query.content,
       chatHistory,
-      botId: thisChatSession.bot,
+      botId: thisChatSession.bot.toString(),
       maxTokens: remainingTokens,
       model: llmId,
     });
@@ -450,6 +453,9 @@ export const userRouter = router({
 
       // As the metadata filter is not working, we will filter the files manually
       let allFiles = await esBackendClient.userKbFiles.listFiles(options);
+
+      // console.log(`[getBotFiles@${botId}]: `, allFiles);
+
       return allFiles;
     }),
   createCheckoutSession: userProcedure

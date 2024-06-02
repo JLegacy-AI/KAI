@@ -47,6 +47,13 @@ export function setAuthCookies(token, isAdmin = false) {
       httpOnly: true,
       maxAge: 12 * 60 * 60, // 12 hours
     });
+  }else {
+    cookies().set({
+      name: "is-admin",
+      value: "false",
+      httpOnly: true,
+      maxAge: 12 * 60 * 60, // 12 hours
+    });
   }
 }
 

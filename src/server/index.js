@@ -104,7 +104,7 @@ export const appRouter = router({
       // If the password is correct, return a JWT token.
       const token = signUserJWT(user.id);
       setAuthCookies(token);
-
+      
       // Token is already set in the cookies, so no need to return it
       return { message: l("Login Successful") };
     }),

@@ -2,13 +2,13 @@ import axios from "axios";
 import { countTokens } from "./utils";
 import { findSimilarDocuments } from "./langchain";
 import { TOGETHER_AI_API_KEY } from "./constants";
+import botModel from "@/server/models/bot.model";
 
 export async function chatCompletion(
   messages,
   model // = "Open-Orca/Mistral-7B-OpenOrca"
 ) {
   try {
-
     // console.log("USING AI MODEL: ", model);
 
     const url = "https://api.together.xyz/v1/chat/completions";
@@ -30,7 +30,8 @@ export async function chatCompletion(
     return response.data;
   } catch (error) {
     if (error instanceof axios.AxiosError) {
-      if(error.response.data.message) return {error: error.response.data.message}
+      if (error.response.data.message)
+        return { error: error.response.data.message };
       return { error: error.response.data.error.message };
     }
     return { error: error.message };
@@ -41,11 +42,16 @@ export async function askTogetherAI({
   question,
   chatHistory,
   botId,
-  botPrompt = undefined,
+  // botPrompt = undefined,
   maxTokens = 0,
-  model // = "Open-Orca/Mistral-7B-OpenOrca",
+  model, // = "Open-Orca/Mistral-7B-OpenOrca",
 }) {
   try {
+    const bot = await botModel.findById(botId);
+    const botPrompt = bot.prompt;
+
+    if (!bot) return { error: "Bot with given Id doesn't exist" };
+
     const chatHistoryTokens = countTokens(
       chatHistory.map((msg) => msg.message).join("") + ` ${question}`
     );
@@ -55,7 +61,7 @@ export async function askTogetherAI({
 
     const relevantDocs = await findSimilarDocuments({
       query: question,
-      noOfDocs: 3,
+      noOfDocs: 5,
       namespace: "user",
       filter: {
         botId: botId,
@@ -66,9 +72,6 @@ export async function askTogetherAI({
 
     const contextText = relevantDocs.map((doc) => doc.pageContent).join("");
     const contextTextTokens = countTokens(contextText);
-
-    console.log("QUESTION: ", question);
-    console.log("CONTEXT: ", contextText);
 
     if (chatHistoryTokens + contextTextTokens > maxTokens) {
       return { error: "Max Tokens Limit Reached", code: "FORBIDDEN" };
@@ -89,8 +92,6 @@ export async function askTogetherAI({
     ];
 
     const response = await chatCompletion(chat, model);
-
-    console.log("[chatCompletion] RESPONSE: ", response);
 
     if (response.error) return { error: response.error };
     return {

@@ -72,16 +72,14 @@ export async function embedAndStoreText(text, metadata = {}, options = {}) {
     });
 
     // Split the text into chunks, also add metadata to each chunk
-    let textChunks = await splitter.createDocuments([text]);//, [metadata]);
+    let textChunks = await splitter.createDocuments([text]); //, [metadata]);
     console.log("Total Chunks: ", textChunks.length);
 
     const result = await embedAndUpsertTexts({
       texts: textChunks.map((chunk) => chunk.pageContent),
       metadata,
       pcIndex,
-      pcOptions: {
-        namespace: options.namespace ?? "user",
-      },
+      namespace: options.namespace,
     });
 
     /*
@@ -97,8 +95,6 @@ export async function embedAndStoreText(text, metadata = {}, options = {}) {
     );
     */
 
-    console.log("[embedAndStoreText] Result: ", result);
-    // console.log("[embedAndStoreText] Pinecone Res:", pineconeRes);
     if (result.error) return { error: result.error };
 
     return { message: "Text embedded and stored successfully" };
@@ -163,7 +159,7 @@ export async function findSimilarDocuments({
   query,
   namespace,
   filter,
-  noOfDocs = 3,
+  noOfDocs = 5,
 }) {
   try {
     const vectorStoreOptions = {
@@ -243,14 +239,12 @@ export async function askAi({
 
     const relevantDocs = await findSimilarDocuments({
       query: question,
-      noOfDocs: 3,
+      noOfDocs: 5,
       namespace: "user",
       filter: {
         botId: botId,
       },
     });
-
-    console.log("[askAI], Relevant Docs: ", relevantDocs);
 
     if (relevantDocs.error) return relevantDocs;
 
@@ -266,8 +260,6 @@ export async function askAi({
       ...(chatHistory ?? []),
       new HumanMessage(question),
     ];
-
-    console.log("[askAI], Chat: ", question, chat);
 
     const res = await llm.invoke(chat);
     const resTokens = countTokens(res);

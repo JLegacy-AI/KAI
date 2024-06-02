@@ -41,13 +41,8 @@ async function embedTexts(texts) {
   }
 }
 
-export async function embedAndUpsertTexts({
-  texts,
-  metadata,
-  pcOptions,
-}) {
+export async function embedAndUpsertTexts({ texts, metadata, namespace = "" }) {
   try {
-
     // divide the texts into batches of 128
     const batchSize = 128;
     const batches = [];
@@ -56,20 +51,17 @@ export async function embedAndUpsertTexts({
     }
 
     for (let i = 0; i < batches.length; i += 1) {
-        const embeddings = await embedTexts(batches[i]);
-        const upserts = embeddings.map((embedding, index) => ({
-            id: uuidv4(),
-            values: embedding.embedding,
-            metadata: {
-            ...metadata,
-            text: texts[index],
-            },
-        }));
-    
-        await pcIndex.upsert(upserts, {
-            // namespace: "user",
-            ...(pcOptions ?? {}),
-        });
+      const embeddings = await embedTexts(batches[i]);
+      const upserts = embeddings.map((embedding, index) => ({
+        id: uuidv4(),
+        values: embedding.embedding,
+        metadata: {
+          ...metadata,
+          text: texts[index],
+        },
+      }));
+
+      await pcIndex.namespace(namespace).upsert(upserts);
     }
 
     return { message: "Embeddings stored successfully" };

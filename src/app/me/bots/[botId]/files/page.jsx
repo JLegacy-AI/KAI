@@ -64,6 +64,7 @@ export default function BotFilesPage({ params }) {
 
   return (
     <Box className="p-6">
+      <Text size="1" color="gray" className="w-[300px]" as="p">{getBot?.data?.id}</Text>
       <Heading>{getBot?.data?.name}</Heading>
       <Text size="1" color="gray" className="w-[300px]" as="p">
         {getBot?.data?.description}

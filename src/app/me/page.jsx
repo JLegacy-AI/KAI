@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from "@radix-ui/themes";
 import {
+  BotIcon,
   BrainIcon,
   FolderOpenIcon,
   MessageSquareTextIcon,
@@ -245,7 +246,7 @@ export default function UserDashboardPage() {
                     asChild
                   >
                     <Link href="/me/bots">
-                      <BrainIcon size="16px" />
+                      <BotIcon size="16px" />
                     </Link>
                   </IconButton>
                 </Tooltip>

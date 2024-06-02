@@ -80,11 +80,11 @@ export default function SettingsModal({
               </DataList.Item>
               <DataList.Item>
                 <DataList.Label>{l("Tokens Granted")}</DataList.Label>
-                <DataList.Value>{user.tokensGranted}</DataList.Value>
+                <DataList.Value>{new Intl.NumberFormat().format(user.tokensGranted || 0)}</DataList.Value>
               </DataList.Item>
               <DataList.Item>
                 <DataList.Label>{l("Tokens Used")}</DataList.Label>
-                <DataList.Value>{user.tokensUsed}</DataList.Value>
+                <DataList.Value>{new Intl.NumberFormat().format(user.tokensUsed || 0)}</DataList.Value>
               </DataList.Item>
             </DataList.Root>
             <Progress

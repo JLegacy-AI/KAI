@@ -69,6 +69,7 @@ export default function UserLoginPage() {
       // Redirect to dashboard
       router.replace("/me");
       router.refresh(); // refresh the page, hence making sure the cookies and user data are updated
+      console.log("Page Refreshed");
     } catch (error) {
       console.log("Error: ", error?.data?.httpStatus, error?.message);
       toast.error(error?.message);
