@@ -16,6 +16,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="module"
+          src="https://unpkg.com/@splinetool/viewer/build/spline-viewer.js"
+        ></script>
+      </head>
       <body className={inter.className}>
         <EdgeStoreProvider>
           <TrpcProvider>

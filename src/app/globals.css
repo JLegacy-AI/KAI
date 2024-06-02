@@ -42,4 +42,13 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  .bg-grid {
+    background-image: linear-gradient(to right, #eee 1px, transparent 1px),
+      linear-gradient(to bottom, #eee 1px, transparent 1px);
+    background-size: 1.5rem 1.5rem;
+    background-position: center;
+  }
+  .black-gradient {
+    @apply bg-gradient-to-t from-gray-500 from-10% to-black
+  }
 }

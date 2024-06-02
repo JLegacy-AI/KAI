@@ -67,8 +67,8 @@ export async function askTogetherAI({
     const contextText = relevantDocs.map((doc) => doc.pageContent).join("");
     const contextTextTokens = countTokens(contextText);
 
-    // console.log("QUESTION: ", question);
-    // console.log("CONTEXT: ", contextText);
+    console.log("QUESTION: ", question);
+    console.log("CONTEXT: ", contextText);
 
     if (chatHistoryTokens + contextTextTokens > maxTokens) {
       return { error: "Max Tokens Limit Reached", code: "FORBIDDEN" };
