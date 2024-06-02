@@ -86,6 +86,13 @@ export const appRouter = router({
         });
       }
 
+      if(user.isAccountDisabled) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Your account is disabled, Please contact Admin.",
+        });
+      }
+
       const isPasswordCorrect = await bcrypt.compare(password, user.password);
       // If the password is incorrect, throw an error
       if (!isPasswordCorrect){

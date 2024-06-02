@@ -18,6 +18,7 @@ import { EllipsisVerticalIcon, FileIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
 import { convertTokenToWordCount } from "@/app/me/utils";
+import Link from "next/link";
 
 export default function BotFilesPage({ params }) {
   const router = useRouter();
@@ -69,7 +70,8 @@ export default function BotFilesPage({ params }) {
       </Text>
       {getBot?.data && (
         <Text size="1" color="gray" className="my-1 w-[300px]" as="p">
-          Word Count: {" "} {new Intl.NumberFormat().format(
+          Word Count:{" "}
+          {new Intl.NumberFormat().format(
             convertTokenToWordCount(getBot?.data?.trainingTokenCount)
           )}
           {/* getBot?.data?.trainingTokenCount */}
@@ -97,6 +99,11 @@ export default function BotFilesPage({ params }) {
                       <EllipsisVerticalIcon size="16" />
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content size="1">
+                      <DropdownMenu.Item>
+                        <Link href={file.url} target="_blank">
+                          View
+                        </Link>
+                      </DropdownMenu.Item>
                       <DropdownMenu.Item
                         onSelect={() => handleDeleteFile(file.url)}
                       >

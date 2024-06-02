@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema(
     tokensGranted: { type: Number, default: 0 }, // Tokens granted to the user
     tokensUsed: { type: Number, default: 0 }, // Tokens used out of the granted tokens
     bots: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bot" }],
+    isAccountDisabled: {
+      type: Boolean, 
+      default: false
+    }
   },
   {
     timestamps: true,

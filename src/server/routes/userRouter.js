@@ -32,7 +32,13 @@ export const userProcedure = publicProcedure.use(async (opts) => {
       code: "UNAUTHORIZED",
       message: l("You are not authorized to access this route"),
     });
+  } else if (ctx.user.isAccountDisabled) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Your account is disabled! Please contact Admin.",
+    });
   }
+
   return next();
 });
 
@@ -550,7 +556,7 @@ export const userRouter = router({
       }
 
       if (!associatedSession.paid) {
-        console.log("Granting 1 Million Tokens")
+        console.log("Granting 1 Million Tokens");
         user.tokensGranted += 1000000; // 1 Million
         await user.save();
         associatedSession.paid = true;

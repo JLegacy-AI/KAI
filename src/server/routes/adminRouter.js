@@ -22,4 +22,28 @@ export const adminRouter = router({
     const res = await userModel.find();
     return res;
   }),
+  disableUserAccount: adminProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        isAccountDisabled: z.boolean(),
+      })
+    )
+    .mutation(async (opts) => {
+      const { userId, isAccountDisabled } = opts.input;
+
+      // Check if the user exists
+      const user = await userModel.findById(userId);
+      if (!user)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User doesn't exist",
+        });
+
+      // disable or enable account
+      user.isAccountDisabled = isAccountDisabled;
+      await user.save();
+
+      return { message: "User access updated successfully!" };
+    }),
 });

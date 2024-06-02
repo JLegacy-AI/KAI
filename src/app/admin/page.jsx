@@ -4,6 +4,7 @@ import { trpc } from "@/app/_trpc/client";
 import { Box, Button, Flex, Heading, Table } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
+import toast from "react-hot-toast"
 
 export default function UsersTrackingPage() {
   const adminLogout = trpc.admin.logout.useMutation();
@@ -12,6 +13,15 @@ export default function UsersTrackingPage() {
   const getUsers = trpc.admin.getUsers.useQuery(undefined, {
     onSuccess: (data) => {
       console.log("[getUsers] Data: ", data);
+    },
+  });
+  const disableUserAccount = trpc.admin.disableUserAccount.useMutation({
+    onSuccess: (data) => {
+      getUsers?.refetch();
+      toast.success(data.message)
+    },
+    onError: (err) => {
+      toast.error(err.message);
     },
   });
 
@@ -39,6 +49,7 @@ export default function UsersTrackingPage() {
               <Table.ColumnHeaderCell>Tokens Granted</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>Tokens Used</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>Total Tokens Used</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Actions</Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -50,28 +61,23 @@ export default function UsersTrackingPage() {
                   </Table.RowHeaderCell>
                   <Table.Cell className="capitalize">{udata.name}</Table.Cell>
                   <Table.Cell>{udata.email}</Table.Cell>
-                  <Table.Cell>{new Intl.NumberFormat().format(udata.tokensGranted || 0)}</Table.Cell>
-                  <Table.Cell>{new Intl.NumberFormat().format(udata.tokensUsed || 0)}</Table.Cell>
-                  <Table.Cell>{new Intl.NumberFormat().format(udata.totalTokensUsed || 0)}</Table.Cell>
-                  {/* <Table.Cell className="flex gap-2 items-center">
-                    <Button
-                      className="cursor-pointer"
-                      size="1"
-                      variant="soft"
-                      asChild
-                    >
-                      <Link href={`/admin/entities/${edata.id}`}>Details</Link>
+                  <Table.Cell>
+                    {new Intl.NumberFormat().format(udata.tokensGranted || 0)}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {new Intl.NumberFormat().format(udata.tokensUsed || 0)}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {new Intl.NumberFormat().format(udata.totalTokensUsed || 0)}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Button size="1" onClick={() => disableUserAccount.mutate({
+                      userId: udata.id,
+                      isAccountDisabled: !udata.isAccountDisabled
+                    })}>
+                      {udata.isAccountDisabled ? "Enable" : "Disable"}
                     </Button>
-                    <Button
-                      className="cursor-pointer"
-                      size="1"
-                      variant="soft"
-                      color="red"
-                      onClick={() => handleDeleteEntity(edata.id)}
-                    >
-                      Delete
-                    </Button>
-                  </Table.Cell> */}
+                  </Table.Cell>
                 </Table.Row>
               );
             })}

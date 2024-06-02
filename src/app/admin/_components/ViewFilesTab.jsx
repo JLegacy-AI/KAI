@@ -18,6 +18,7 @@ import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { l } from "@/lib/language";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
+import Link from "next/link";
 
 export default function ViewFilesTab({
   fileBucketName,
@@ -109,6 +110,11 @@ export default function ViewFilesTab({
                     </IconButton>
                   </DropdownMenu.Trigger>
                   <DropdownMenu.Content size="1">
+                    <DropdownMenu.Item>
+                      <Link href={fileData.url} target="_blank">
+                        View
+                      </Link>
+                    </DropdownMenu.Item>
                     <DropdownMenu.Item
                       onClick={() => handleDeleteFile(fileData.url)}
                     >
