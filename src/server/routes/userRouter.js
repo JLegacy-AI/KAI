@@ -389,7 +389,8 @@ export const userRouter = router({
         creator: { $ne: user._id },
         accessType: "public",
       })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .populate("creator");
 
     return bots.filter((bot) => !user.bots.includes(bot._id));
   }),

@@ -62,13 +62,18 @@ export default function BotsCommunityPage() {
                   {bot.description}
                 </Text>
               </Box>
-              <Box className="mt-2 flex justify-between items-center">
-                <Text as="p" size="2" color="gray">
-                  Word Count:{" "}
-                  {new Intl.NumberFormat().format(
-                    convertTokenToWordCount(bot.trainingTokenCount)
-                  )}
-                </Text>
+              <Box className="mt-2 flex justify-between items-end">
+                <Box>
+                  <Text as="p" size="2" color="gray">
+                    Word Count:{" "}
+                    {new Intl.NumberFormat().format(
+                      convertTokenToWordCount(bot.trainingTokenCount)
+                    )}
+                  </Text>
+                  <Text as="p" size="1" color="gray">
+                    Creator: {bot?.creator?.name}
+                  </Text>
+                </Box>
                 <Button
                   size="1"
                   onClick={() =>
@@ -77,7 +82,7 @@ export default function BotsCommunityPage() {
                     })
                   }
                 >
-                  Add to Collection
+                  Import
                 </Button>
               </Box>
             </Card>
