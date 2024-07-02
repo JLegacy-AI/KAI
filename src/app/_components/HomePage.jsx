@@ -54,12 +54,18 @@ export default function HomePage() {
       style={{ backgroundSize: "2.5rem 2.5rem" }}
     >
       <nav className="container py-6 px-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-600">KAI</h1>
+        <h1 className="text-xl font-bold text-purple-800">Knowledge AI</h1>
         <div className="flex items-center gap-6">
-          <Link href="/signup" className="text-gray-600 hover:text-gray-800">
+          <Link
+            href="/signup"
+            className="text-white transition-all duration-200 rounded-md bg-black hover:bg-gray-300 hover:text-black px-4 py-2 min-w-[100px] text-center"
+          >
             Signup
           </Link>
-          <Link href="/login" className="text-gray-600 hover:text-gray-800">
+          <Link
+            href="/login"
+            className="text-white transition-all duration-200 rounded-md bg-black hover:bg-gray-300 hover:text-black px-4 py-2 min-w-[100px] text-center"
+          >
             Login
           </Link>
         </div>
@@ -83,7 +89,7 @@ export default function HomePage() {
             <p className="py-2 text-xl md:text-2xl max-w-[500px] text-gray-400">
               Create specialized bots tailored to specific domains.
             </p>
-            <button className="bg-gray-800 hover:bg-gray-900 text-white text-base md:text-lg px-3 py-2 rounded mt-4">
+            <button className="text-white transition-all duration-200 rounded-md bg-black hover:bg-gray-300 hover:text-black px-4 py-2 min-w-[100px] md:text-lg mt-4">
               <Link href={"/login"}>Get Started</Link>
             </button>
           </div>

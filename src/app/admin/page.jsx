@@ -4,7 +4,7 @@ import { trpc } from "@/app/_trpc/client";
 import { Box, Button, Flex, Heading, Table } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
 import { useEdgeStore } from "@/lib/edgestore/edgestore";
-import toast from "react-hot-toast"
+import toast from "react-hot-toast";
 
 export default function UsersTrackingPage() {
   const adminLogout = trpc.admin.logout.useMutation();
@@ -18,7 +18,7 @@ export default function UsersTrackingPage() {
   const disableUserAccount = trpc.admin.disableUserAccount.useMutation({
     onSuccess: (data) => {
       getUsers?.refetch();
-      toast.success(data.message)
+      toast.success(data.message);
     },
     onError: (err) => {
       toast.error(err.message);
@@ -71,10 +71,20 @@ export default function UsersTrackingPage() {
                     {new Intl.NumberFormat().format(udata.totalTokensUsed || 0)}
                   </Table.Cell>
                   <Table.Cell>
-                    <Button size="1" onClick={() => disableUserAccount.mutate({
-                      userId: udata.id,
-                      isAccountDisabled: !udata.isAccountDisabled
-                    })}>
+                    <Button
+                      className={
+                        udata.isAccountDisabled
+                          ? "bg-red-600 text-white "
+                          : "bg-green-600 text-white"
+                      }
+                      size="1"
+                      onClick={() =>
+                        disableUserAccount.mutate({
+                          userId: udata.id,
+                          isAccountDisabled: !udata.isAccountDisabled,
+                        })
+                      }
+                    >
                       {udata.isAccountDisabled ? "Enable" : "Disable"}
                     </Button>
                   </Table.Cell>

@@ -19,6 +19,8 @@ import { useEffect } from "react";
 import { FileIcon, PencilIcon, TrashIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import { convertTokenToWordCount } from "../utils";
+import BOT_ from "../../../../public/assets/bot_4.jpg";
+import Image from "next/image";
 
 export default function ViewBotsPage() {
   const user = trpc.user.get.useQuery(undefined, {});
@@ -46,23 +48,31 @@ export default function ViewBotsPage() {
 
   return (
     <Box className="relative">
-      <Heading className="text-center my-4">Your Bots</Heading>
+      <Heading className="text-start my-4 px-7 text-lg">Your Bots</Heading>
       {getBots?.isLoading ? (
         <Box className="w-full flex items-center justify-center">
           <Spinner />
         </Box>
       ) : getBots?.data?.length === 0 ? (
         <Box className="w-full my-2">
-          <Text className="text-center" as="p">No Bots Found</Text>
+          <Text className="text-center" as="p">
+            No Bots Found
+          </Text>
         </Box>
       ) : (
-        <Box className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-4">
+        <Box className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 justify-items-center gap-4">
           {getBots?.data?.map((bot, idx) => (
             <Card
               className="bg-white px-4 py-4 flex flex-col justify-between w-[300px] min-h-[100px]"
               key={idx}
             >
               <Box>
+                <Image
+                  className="border rounded-md mb-2"
+                  width={60}
+                  height={60}
+                  src={BOT_}
+                />
                 <Heading size="4">{bot.name}</Heading>
                 <Text as="p" size="1" color="gray" className="mt-1">
                   {bot.description}

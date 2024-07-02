@@ -12,6 +12,8 @@ import {
 } from "@radix-ui/themes";
 import { trpc } from "@/app/_trpc/client";
 import { convertTokenToWordCount } from "../../utils";
+import BOT_ from "../../../../../public/assets/bot_3.jpg";
+import Image from "next/image";
 
 export default function BotsCommunityPage() {
   const getCommunityBots = trpc.user.getCommunityBots.useQuery(undefined, {
@@ -50,13 +52,18 @@ export default function BotsCommunityPage() {
           </Text>
         </Box>
       ) : (
-        <Box className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-4">
+        <Box className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 justify-items-center gap-4">
           {getCommunityBots?.data?.map((bot, idx) => (
             <Card
               className="bg-white px-4 py-4 flex flex-col justify-between w-[300px] min-h-[100px]"
               key={idx}
             >
               <Box>
+                <Image
+                  className="border rounded-md mb-3"
+                  height={60}
+                  src={BOT_}
+                />
                 <Heading size="4">{bot.name}</Heading>
                 <Text as="p" size="1" color="gray" className="mt-1">
                   {bot.description}

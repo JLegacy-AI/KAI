@@ -13,6 +13,8 @@ import {
 import { trpc } from "@/app/_trpc/client";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "react-hot-toast";
+import Image from "next/image";
+import BOT_ from "../../../../../public/assets/bot_.jpg";
 
 export default function CreateBotForm({ onSubmit, botData, isLoading, ref }) {
   const [inputErrors, setInputErrors] = useState({});
@@ -69,6 +71,22 @@ export default function CreateBotForm({ onSubmit, botData, isLoading, ref }) {
       onSubmit={handleSubmit}
     >
       <Flex direction="column" className="w-full h-full gap-4">
+        <Box
+          style={{
+            width: "100%",
+            height: "60px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Image
+            className="border rounded-md"
+            width={60}
+            height={60}
+            src={BOT_}
+          />
+        </Box>
         <Heading className="text-center" size="6">
           {botData ? "Update" : "Add"} Bot
         </Heading>

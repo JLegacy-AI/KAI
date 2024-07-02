@@ -41,10 +41,10 @@ export default function Navbar() {
   return (
     <Box className="w-full bg-white border-b">
       <Flex className="w-full p-4 justify-between items-center container">
-        <Heading className="text-2xl">KAI</Heading>
+        <Heading className="text-2xl">Knowledge AI</Heading>
         <Flex className="gap-6 items-center">
           {links.map((link) => (
-            <Button variant="ghost" size="2" key={link.href} asChild>
+            <Button variant="ghost" size="3" key={link.href} asChild>
               <Link href={link.href}>{link.title}</Link>
             </Button>
           ))}

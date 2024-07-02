@@ -57,7 +57,7 @@ export default function UserLoginPage() {
 
       setInputs(newInputs);
       setIsSubmitting(false);
-      return ;
+      return;
     }
     setIsSubmitting(false);
     setInputs(initialFormState);
@@ -77,52 +77,73 @@ export default function UserLoginPage() {
   }
 
   return (
-    <Section height="100vh" style={{ backgroundColor: "var(--gray-a2)" }} dir={layoutDir}>
+    <Section
+      height="100vh"
+      style={{ backgroundColor: "var(--gray-a2)" }}
+      dir={layoutDir}
+    >
       <Container align="center" px="5" style={{ height: "100%" }} as="div">
-        <Flex
-          justify="center"
-          align="center"
-          direction="column"
-          style={{ height: "100%" }}
-          className="h-full"
-        >
+        <Flex justify="center" align="center" style={{ height: "100%" }}>
           <Card
-            style={{ width: "350px" }}
-            p="50px"
-            className="p-6"
-            variant="classic"
+            className=" shadow-lg"
+            style={{
+              width: "100%",
+              height: "90%",
+              display: "flex",
+              padding: 0,
+            }}
           >
-            <Heading align="center" my="20px">
-              {l("User Login")}
-            </Heading>
-            <form onSubmit={handleSubmit}>
-              {inputs &&
-                Object.keys(inputs).map((key, idx) => (
-                  <Box my="10px" key={idx}>
-                    <TextField.Root
-                      name={key}
-                      placeholder={l(key)}
-                      type={inputs[key].type || "text"}
-                    />
-                    {inputs[key].error && (
-                      <Text size="1" color="red">
-                        {inputs[key].error}
-                      </Text>
-                    )}
-                  </Box>
-                ))}
-              <Button
-                variant="classic"
-                className="cursor-pointer w-full"
-                // onClick={handleLogin}
-                type="submit"
-                loading={isSubmitting}
-              >
-                {l("Login")}
-              </Button>
-            </form>
+            <Box
+              style={{
+                flex: 2,
+                background: "url('/assets/login_.jpeg') center/cover",
+              }}
+            ></Box>
+            <Box
+              style={{
+                flex: 1,
+                padding: "50px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+              }}
+            >
+              <Heading align="center" my="20px">
+                {l("User Login")}
+              </Heading>
+              <form onSubmit={handleSubmit}>
+                {inputs &&
+                  Object.keys(inputs).map((key, idx) => (
+                    <Box my="10px" key={idx}>
+                      <TextField.Root
+                        name={key}
+                        placeholder={l(key)}
+                        type={inputs[key].type || "text"}
+                      />
+                      {inputs[key].error && (
+                        <Text size="1" color="red">
+                          {inputs[key].error}
+                        </Text>
+                      )}
+                    </Box>
+                  ))}
+                <Button
+                  variant="classic"
+                  className="cursor-pointer w-full "
+                  type="submit"
+                  loading={isSubmitting}
+                >
+                  {l("Login")}
+                </Button>
+              </form>
+              <Text className="mt-2 text-gray-600" align="center">
+                {l("Do not have an account?")}{" "}
+                <Link href="/signup" className="text-blue-600 underline">
+                  {l("Signup")}
+                </Link>
+              </Text>
+            </Box>
           </Card>
-          <Text className="mt-2 text-gray-600" >{l("Do not have an account")} <Link href="/signup" className="text-blue-600 underline">{l("Signup")}</Link></Text>
         </Flex>
       </Container>
     </Section>
